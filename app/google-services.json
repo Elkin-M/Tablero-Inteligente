@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "44466444571",
+    "project_id": "ecolibertad-ia",
+    "storage_bucket": "ecolibertad-ia.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:44466444571:android:9801494094245793b29bbe",
+        "android_client_info": {
+          "package_name": "co.edu.lalibertad.ecolibertad"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1rbnkDl9Cascgkb9K9EryKuUteRnMA2Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:44466444571:android:0e7fcc82728188fdb29bbe",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1rbnkDl9Cascgkb9K9EryKuUteRnMA2Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
