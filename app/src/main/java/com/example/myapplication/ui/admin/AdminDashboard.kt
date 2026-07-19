@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -61,14 +61,14 @@ fun AdminDashboard(
                         modifier = Modifier.weight(1f),
                         title = "Cursos",
                         value = "${ranking.size}",
-                        icon = Icons.Default.Group,
+                        icon = Icons.Default.Face,
                         containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
                     MetricCard(
                         modifier = Modifier.weight(1f),
                         title = "Evaluaciones",
                         value = "128", // Placeholder
-                        icon = Icons.Default.Group,
+                        icon = Icons.Default.Face,
                         containerColor = MaterialTheme.colorScheme.secondaryContainer
                     )
                 }
