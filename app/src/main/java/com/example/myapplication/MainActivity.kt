@@ -41,8 +41,8 @@ fun EcoLibertadNavigation() {
                 when (role) {
                     UserRole.ADMIN -> navController.navigate(Screen.AdminDashboard.route)
                     UserRole.DOCENTE -> navController.navigate(Screen.TeacherDashboard.route)
-                    UserRole.ESTUDIANTE -> navController.navigate(Screen.AdminDashboard.route)
-                    else -> navController.navigate(Screen.AdminDashboard.route)
+                    UserRole.ESTUDIANTE -> navController.navigate(Screen.StudentDashboard.route)
+                    else -> navController.navigate(Screen.StudentDashboard.route)
                 }
             })
         }
