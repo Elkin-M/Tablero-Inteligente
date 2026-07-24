@@ -32,10 +32,24 @@ class EvaluationViewModel @Inject constructor(
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser
 
+    private val _recentEvaluations = MutableStateFlow<List<Evaluation>>(emptyList())
+    val recentEvaluations = _recentEvaluations.asStateFlow()
+
     init {
         viewModelScope.launch {
-            authRepository.getCurrentUser().collect {
-                _currentUser.value = it
+            authRepository.getCurrentUser().collect { user ->
+                _currentUser.value = user
+                user?.let {
+                    loadRecentEvaluations(it.uid)
+                }
+            }
+        }
+    }
+
+    private fun loadRecentEvaluations(docenteId: String) {
+        viewModelScope.launch {
+            repository.getEvaluationsByDocente(docenteId).collect {
+                _recentEvaluations.value = it.sortedByDescending { eval -> eval.fecha }
             }
         }
     }

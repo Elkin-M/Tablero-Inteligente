@@ -5,5 +5,6 @@ enum class UserRole {
     DIRECTIVO,
     DOCENTE,
     COMITE_AMBIENTAL,
-    ESTUDIANTE
+    ESTUDIANTE,
+    INVITADO
 }

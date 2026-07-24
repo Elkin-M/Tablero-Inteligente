@@ -21,12 +21,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.myapplication.domain.model.Evaluation
+import com.example.myapplication.ui.theme.EcoColors
 import com.example.myapplication.ui.viewmodel.EvaluationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,13 +86,16 @@ fun EvaluationForm(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Evaluación: $roomId") },
+                title = { Text("Evaluación: $roomId", color = Color.White, fontWeight = FontWeight.Bold) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = EcoColors.DocentePrimary
+                ),
                 actions = {
                     if (isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
                     } else {
                         IconButton(onClick = onSave) {
-                            Icon(Icons.Default.Check, contentDescription = "Guardar")
+                            Icon(Icons.Default.Check, contentDescription = "Guardar", tint = Color.White)
                         }
                     }
                 }
@@ -113,25 +118,33 @@ fun EvaluationForm(
 
             // Indicador de Limpieza
             Column {
-                Text("Limpieza y Orden: ${limpieza.toInt()}/5")
+                Text("Limpieza y Orden: ${limpieza.toInt()}/5", color = EcoColors.DocentePrimary, fontWeight = FontWeight.Bold)
                 Slider(
                     value = limpieza,
                     onValueChange = { limpieza = it },
                     valueRange = 1f..5f,
                     steps = 3,
-                    enabled = !isLoading
+                    enabled = !isLoading,
+                    colors = SliderDefaults.colors(
+                        thumbColor = EcoColors.DocentePrimary,
+                        activeTrackColor = EcoColors.DocentePrimary
+                    )
                 )
             }
 
             // Indicador de Reciclaje
             Column {
-                Text("Uso correcto de papeleras: ${reciclaje.toInt()}/5")
+                Text("Uso correcto de papeleras: ${reciclaje.toInt()}/5", color = EcoColors.DocentePrimary, fontWeight = FontWeight.Bold)
                 Slider(
                     value = reciclaje,
                     onValueChange = { reciclaje = it },
                     valueRange = 1f..5f,
                     steps = 3,
-                    enabled = !isLoading
+                    enabled = !isLoading,
+                    colors = SliderDefaults.colors(
+                        thumbColor = EcoColors.DocentePrimary,
+                        activeTrackColor = EcoColors.DocentePrimary
+                    )
                 )
             }
 
@@ -141,8 +154,16 @@ fun EvaluationForm(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Luces/Ventiladores apagados")
-                Switch(checked = energia, onCheckedChange = { energia = it }, enabled = !isLoading)
+                Text("Luces/Ventiladores apagados", fontWeight = FontWeight.Medium)
+                Switch(
+                    checked = energia, 
+                    onCheckedChange = { energia = it }, 
+                    enabled = !isLoading,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = EcoColors.DocentePrimary,
+                        checkedTrackColor = EcoColors.DocentePrimary.copy(alpha = 0.5f)
+                    )
+                )
             }
 
             // Evidencia Fotográfica
@@ -207,7 +228,10 @@ fun EvaluationForm(
                 onClick = onSave,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                enabled = !isLoading
+                enabled = !isLoading,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = EcoColors.DocentePrimary
+                )
             ) {
                 if (isLoading) {
                     Text("Guardando...")

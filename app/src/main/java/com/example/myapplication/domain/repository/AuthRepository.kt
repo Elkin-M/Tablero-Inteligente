@@ -9,4 +9,5 @@ interface AuthRepository {
     suspend fun login(email: String, pass: String): Result<User>
     suspend fun logout()
     suspend fun register(user: User, pass: String): Result<User>
+    suspend fun signInWithGoogle(idToken: String): Result<User>
 }

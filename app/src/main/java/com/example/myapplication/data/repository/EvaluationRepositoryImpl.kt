@@ -69,4 +69,18 @@ class EvaluationRepositoryImpl @Inject constructor(
             }
         awaitClose { subscription.remove() }
     }
+
+    override fun getEvaluationsByDocente(docenteId: String): Flow<List<Evaluation>> = callbackFlow {
+        val subscription = firestore.collection("evaluations")
+            .whereEqualTo("docenteId", docenteId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                val evaluations = snapshot?.toObjects(Evaluation::class.java) ?: emptyList()
+                trySend(evaluations)
+            }
+        awaitClose { subscription.remove() }
+    }
 }
