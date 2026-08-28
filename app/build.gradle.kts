@@ -47,6 +47,13 @@ android {
     buildFeatures {
         compose = true
     }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/INDEX.LIST"
+            excludes += "/META-INF/DEPENDENCIES"
+        }
+    }
 }
 
 dependencies {
@@ -78,10 +85,23 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
+    // Google Drive & Auth
+    implementation(libs.play.services.auth)
+    implementation(libs.google.api.client.android)
+    implementation(libs.google.api.services.drive)
+    implementation(libs.google.http.client.gson)
+
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
+
+    // gRPC explicit overrides
+    implementation(platform(libs.grpc.bom))
+    implementation(libs.grpc.android)
+    implementation(libs.grpc.okhttp)
+    implementation(libs.grpc.protobuf.lite)
+    implementation(libs.grpc.stub)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

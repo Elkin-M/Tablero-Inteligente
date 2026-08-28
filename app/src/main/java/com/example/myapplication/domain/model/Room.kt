@@ -9,5 +9,8 @@ data class Room(
     val nombre: String = "",       // Ej: "8A"
     val bloque: String = "",       // Ej: "Bloque Principal"
     val active: Boolean = true,
-    val fechaRegistro: Long = System.currentTimeMillis()
+    val fechaRegistro: Long = System.currentTimeMillis(),
+    val docenteId: String = "",     // ID del docente responsable o creador
+    val puntosTotales: Int = 0,
+    val embajadorAmbiental: String = ""
 )

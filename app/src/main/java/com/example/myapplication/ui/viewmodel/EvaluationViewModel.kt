@@ -2,22 +2,26 @@ package com.example.myapplication.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.repository.EcoRepository
 import com.example.myapplication.domain.model.Evaluation
+import com.example.myapplication.domain.model.Indicator
 import com.example.myapplication.domain.model.User
 import com.example.myapplication.domain.repository.AuthRepository
 import com.example.myapplication.domain.repository.EvaluationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class EvaluationViewModel @Inject constructor(
     private val repository: EvaluationRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val ecoRepository: EcoRepository
 ) : ViewModel() {
 
     private val _loading = MutableStateFlow(false)
@@ -35,6 +39,24 @@ class EvaluationViewModel @Inject constructor(
     private val _recentEvaluations = MutableStateFlow<List<Evaluation>>(emptyList())
     val recentEvaluations = _recentEvaluations.asStateFlow()
 
+    val indicators: StateFlow<List<Indicator>> = ecoRepository.getIndicatorsFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val courses: StateFlow<List<com.example.myapplication.domain.model.Course>> = ecoRepository.getCoursesFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val rooms: StateFlow<List<com.example.myapplication.domain.model.Room>> = ecoRepository.getRoomsFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val students: StateFlow<List<User>> = ecoRepository.getUsersFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun updateStudentCourse(studentUid: String, courseId: String) {
+        viewModelScope.launch {
+            ecoRepository.updateUserRole(studentUid, com.example.myapplication.domain.model.UserRole.ESTUDIANTE, courseId)
+        }
+    }
+
     init {
         viewModelScope.launch {
             authRepository.getCurrentUser().collect { user ->
@@ -48,8 +70,12 @@ class EvaluationViewModel @Inject constructor(
 
     private fun loadRecentEvaluations(docenteId: String) {
         viewModelScope.launch {
-            repository.getEvaluationsByDocente(docenteId).collect {
-                _recentEvaluations.value = it.sortedByDescending { eval -> eval.fecha }
+            try {
+                repository.getEvaluationsByDocente(docenteId).collect { list ->
+                    _recentEvaluations.value = list.sortedByDescending { eval -> eval.fecha }
+                }
+            } catch (e: Exception) {
+                _error.value = "Error al cargar evaluaciones: ${e.message}"
             }
         }
     }
@@ -58,12 +84,12 @@ class EvaluationViewModel @Inject constructor(
         viewModelScope.launch {
             _loading.value = true
             _error.value = null
-            // Ensure we have user info
             val user = _currentUser.value
+            
+            // Si el roomId proporcionado es el ID de un salón/aula, lo usamos como courseId para los puntos
             val finalEval = evaluation.copy(
                 docenteId = user?.uid ?: "unknown",
-                // In a real scenario, courseId might be linked to the room or selected
-                courseId = evaluation.courseId.ifEmpty { user?.courseId ?: "GENERAL" }
+                courseId = evaluation.roomId // Usamos el ID del aula como courseId para la transacción de puntos
             )
             
             val result = repository.registerEvaluation(finalEval, photoUris)

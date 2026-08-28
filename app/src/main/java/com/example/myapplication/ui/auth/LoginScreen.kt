@@ -1,5 +1,10 @@
 package com.example.myapplication.ui.auth
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -49,6 +54,33 @@ fun LoginScreen(
 
     val context = LocalContext.current
 
+    /*
+    // Configuración de Google Sign-In (Desactivado temporalmente para evitar Error 10)
+    val gso = remember {
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(context.getString(R.string.default_web_client_id)) 
+            .requestEmail()
+            .build()
+    }
+    val googleSignInClient = remember { GoogleSignIn.getClient(context, gso) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            account?.idToken?.let { idToken ->
+                viewModel.signInWithGoogle(idToken, onLoginSuccess)
+            } ?: run {
+                Toast.makeText(context, "Error al obtener token de Google", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: ApiException) {
+            Toast.makeText(context, "Error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+        }
+    }
+    */
+
     LoginScreenContent(
         email = email,
         onEmailChange = { email = it; viewModel.clearError() },
@@ -67,10 +99,8 @@ fun LoginScreen(
             viewModel.login(email.trim(), password, onLoginSuccess)
         },
         onGoogleLoginClick = {
-            // Placeholder for Google Sign-In intent/launcher
-            Toast.makeText(context, "Iniciando flujo de Google...", Toast.LENGTH_SHORT).show()
-            // In a real scenario, you'd launch the Google SignIn intent here
-            // and then call viewModel.signInWithGoogle(idToken, onLoginSuccess)
+            // Desactivado temporalmente
+            Toast.makeText(context, "Inicio con Google no disponible por ahora", Toast.LENGTH_SHORT).show()
         },
         onGoToRegister = onGoToRegister,
         onGoToRoleSelection = onGoToRoleSelection
@@ -148,7 +178,12 @@ fun LoginScreenContent(
                 focusedTextColor = EcoColors.TextDark,
                 unfocusedTextColor = EcoColors.TextDark,
                 focusedLeadingIconColor = EcoColors.PrimaryGreen,
-                unfocusedLeadingIconColor = EcoColors.TextMuted
+                unfocusedLeadingIconColor = EcoColors.TextMuted,
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White,
+                cursorColor = EcoColors.PrimaryGreen,
+                focusedPlaceholderColor = EcoColors.Placeholder,
+                unfocusedPlaceholderColor = EcoColors.Placeholder
             )
         )
 
@@ -181,7 +216,12 @@ fun LoginScreenContent(
                 focusedLeadingIconColor = EcoColors.PrimaryGreen,
                 unfocusedLeadingIconColor = EcoColors.TextMuted,
                 focusedTrailingIconColor = EcoColors.PrimaryGreen,
-                unfocusedTrailingIconColor = EcoColors.TextMuted
+                unfocusedTrailingIconColor = EcoColors.TextMuted,
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White,
+                cursorColor = EcoColors.PrimaryGreen,
+                focusedPlaceholderColor = EcoColors.Placeholder,
+                unfocusedPlaceholderColor = EcoColors.Placeholder
             )
         )
 
@@ -195,12 +235,20 @@ fun LoginScreenContent(
         }
 
         errorMessage?.let {
-            Text(
-                it,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            Surface(
+                color = MaterialTheme.colorScheme.errorContainer,
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            ) {
+                Text(
+                    it,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -210,7 +258,9 @@ fun LoginScreenContent(
             enabled = !isLoading,
             colors = ButtonDefaults.buttonColors(
                 containerColor = EcoColors.PrimaryGreen,
-                contentColor = Color.White
+                contentColor = Color.White,
+                disabledContainerColor = EcoColors.PrimaryGreen.copy(alpha = 0.6f),
+                disabledContentColor = Color.White.copy(alpha = 0.6f)
             ),
             shape = RoundedCornerShape(14.dp),
             modifier = Modifier
@@ -228,6 +278,7 @@ fun LoginScreenContent(
             }
         }
 
+        /*
         Spacer(modifier = Modifier.height(24.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -257,16 +308,13 @@ fun LoginScreenContent(
         ) {
             Text("Continuar con Google", fontWeight = FontWeight.Medium)
         }
+        */
 
         Spacer(modifier = Modifier.height(24.dp))
 
         TextButton(onClick = onGoToRegister, enabled = !isLoading) {
             Text("¿No tienes cuenta? ", color = EcoColors.TextMuted)
             Text("Regístrate", color = EcoColors.PrimaryGreen, fontWeight = FontWeight.Bold)
-        }
-
-        TextButton(onClick = onGoToRoleSelection, enabled = !isLoading) {
-            Text("Vista previa por rol (sin iniciar sesión)", color = EcoColors.TextMuted)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -296,11 +344,10 @@ fun LoginScreenPreview() {
 
 private fun mapFirestoreRoleToUserRole(roleString: String): UserRole {
     return when (roleString.trim().lowercase()) {
-        "admin", "administrador" -> UserRole.ADMIN
-        "directivo" -> UserRole.DIRECTIVO
+        "admin", "administrador", "directivo", "comite_ambiental", "comité ambiental", "comite ambiental" -> UserRole.ADMIN
         "docente", "profesor" -> UserRole.DOCENTE
-        "comite_ambiental", "comité ambiental", "comite ambiental" -> UserRole.COMITE_AMBIENTAL
         "estudiante", "alumno" -> UserRole.ESTUDIANTE
+        "invitado" -> UserRole.INVITADO
         else -> UserRole.ESTUDIANTE
     }
 }

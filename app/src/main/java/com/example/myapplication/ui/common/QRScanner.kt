@@ -22,9 +22,10 @@ fun QRScanner(
         options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
         options.setPrompt("Escanea el código QR del salón")
         options.setCameraId(0)
-        options.setBeepEnabled(false)
+        options.setBeepEnabled(true)
         options.setBarcodeImageEnabled(true)
-        options.setOrientationLocked(false)
+        options.setOrientationLocked(true)
+        options.setCaptureActivity(VerticalCaptureActivity::class.java)
         scannerLauncher.launch(options)
     }
 }

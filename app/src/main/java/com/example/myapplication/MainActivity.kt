@@ -15,9 +15,15 @@ import com.example.myapplication.ui.admin.CampaignManagementScreen
 import com.example.myapplication.ui.admin.ChallengeManagementScreen
 import com.example.myapplication.ui.admin.CourseManagementScreen
 import com.example.myapplication.ui.admin.EvaluationManagementScreen
+import com.example.myapplication.ui.admin.EvidenceManagementScreen
+import com.example.myapplication.ui.admin.IndicatorManagementScreen
+import com.example.myapplication.ui.admin.ReportsScreen
 import com.example.myapplication.ui.admin.RoomManagementScreen
+import com.example.myapplication.ui.admin.SettingsScreen
 import com.example.myapplication.ui.admin.UserManagementScreen
+import com.example.myapplication.ui.auth.InvitadoDashboard
 import com.example.myapplication.ui.auth.LoginScreen
+import com.example.myapplication.ui.dashboard.EnvironmentalDashboardScreen
 import com.example.myapplication.ui.auth.RegisterScreen
 import com.example.myapplication.ui.auth.RoleSelectionScreen
 import com.example.myapplication.ui.auth.SplashScreen
@@ -51,9 +57,7 @@ fun EcoLibertadNavigation() {
             UserRole.ADMIN -> Screen.AdminDashboard.route
             UserRole.DOCENTE -> Screen.TeacherDashboard.route
             UserRole.ESTUDIANTE -> Screen.StudentDashboard.route
-            UserRole.DIRECTIVO -> Screen.ComingSoon.createRoute("Directivo")
-            UserRole.COMITE_AMBIENTAL -> Screen.ComingSoon.createRoute("Comité Ambiental")
-            UserRole.INVITADO -> Screen.ComingSoon.createRoute("Invitado")
+            UserRole.INVITADO -> Screen.InvitadoDashboard.route
         }
         navController.navigate(route) {
             popUpTo(Screen.Login.route) { inclusive = true }
@@ -79,7 +83,7 @@ fun EcoLibertadNavigation() {
         }
         composable(Screen.Register.route) {
             RegisterScreen(
-                onRegisterSuccess = { navController.popBackStack() },
+                onRegisterSuccess = { role -> navigateByRole(role) },
                 onBack = { navController.popBackStack() }
             )
         }
@@ -95,27 +99,34 @@ fun EcoLibertadNavigation() {
         composable(Screen.StudentDashboard.route) {
             StudentDashboard(navController)
         }
-        composable(Screen.AdminDashboard.route) {
-            AdminDashboard(navController)
-        }
+        composable(Screen.AdminDashboard.route) { AdminDashboard(navController) }
+        composable(Screen.InvitadoDashboard.route) { InvitadoDashboard(navController) }
+        
         // Rutas de Gestión Administrativa
         composable(Screen.UserManagement.route) { UserManagementScreen(navController) }
         composable(Screen.CourseManagement.route) { CourseManagementScreen(navController) }
         composable(Screen.RoomManagement.route) { RoomManagementScreen(navController) }
-        composable(Screen.IndicatorManagement.route) { ComingSoonScreen("Gestión de Indicadores") }
+        composable(Screen.IndicatorManagement.route) { IndicatorManagementScreen(navController) }
         composable(Screen.CampaignManagement.route) { CampaignManagementScreen(navController) }
         composable(Screen.ChallengeManagement.route) { ChallengeManagementScreen(navController) }
         composable(Screen.BadgeManagement.route) { BadgeManagementScreen(navController) }
         composable(Screen.EvaluationManagement.route) { EvaluationManagementScreen(navController) }
-        composable(Screen.EvidenceManagement.route) { ComingSoonScreen("Gestión de Evidencias") }
-        composable(Screen.Reports.route) { ComingSoonScreen("Reportes y Estadísticas") }
-        composable(Screen.Settings.route) { ComingSoonScreen("Configuración") }
+        composable(Screen.EvidenceManagement.route) { EvidenceManagementScreen(onBack = { navController.popBackStack() }) }
+        composable(Screen.Reports.route) { ReportsScreen(onBack = { navController.popBackStack() }) }
+        composable(Screen.Settings.route) { SettingsScreen(onBack = { navController.popBackStack() }) }
+        composable(Screen.EnvironmentalDashboard.route) { EnvironmentalDashboardScreen(navController) }
 
-        composable(Screen.ComingSoon.route) { backStackEntry ->
-            val roleName = backStackEntry.arguments?.getString("roleName") ?: ""
+        composable(
+            route = Screen.ComingSoon.route,
+            arguments = listOf(androidx.navigation.navArgument("roleName") { type = androidx.navigation.NavType.StringType })
+        ) { backStackEntry ->
+            val roleName = backStackEntry.arguments?.getString("roleName")?.replace("_", " ") ?: ""
             ComingSoonScreen(roleName)
         }
-        composable(Screen.EvaluationForm.route) { backStackEntry ->
+        composable(
+            route = Screen.EvaluationForm.route,
+            arguments = listOf(androidx.navigation.navArgument("roomId") { type = androidx.navigation.NavType.StringType })
+        ) { backStackEntry ->
             val roomId = backStackEntry.arguments?.getString("roomId") ?: ""
             EvaluationForm(roomId, navController)
         }

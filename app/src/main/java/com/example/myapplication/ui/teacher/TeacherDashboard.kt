@@ -4,8 +4,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
@@ -23,11 +26,13 @@ import com.example.myapplication.ui.navigation.Screen
 import com.example.myapplication.ui.theme.EcoColors
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.ui.viewmodel.EvaluationViewModel
+import com.example.myapplication.ui.viewmodel.AuthViewModel
 
 @Composable
 fun TeacherDashboard(
     navController: NavController,
-    viewModel: EvaluationViewModel = hiltViewModel()
+    viewModel: EvaluationViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
     var showScanner by remember { mutableStateOf(false) }
     val recentEvaluations by viewModel.recentEvaluations.collectAsState()
@@ -43,7 +48,14 @@ fun TeacherDashboard(
 
     TeacherDashboardContent(
         recentEvaluations = recentEvaluations,
-        onScanClick = { showScanner = true }
+        onScanClick = { showScanner = true },
+        onLogout = {
+            authViewModel.logout {
+                navController.navigate(Screen.Login.route) {
+                    popUpTo(Screen.TeacherDashboard.route) { inclusive = true }
+                }
+            }
+        }
     )
 }
 
@@ -51,17 +63,47 @@ fun TeacherDashboard(
 @Composable
 fun TeacherDashboardContent(
     recentEvaluations: List<Evaluation>,
-    onScanClick: () -> Unit
+    onScanClick: () -> Unit,
+    onLogout: () -> Unit,
+    viewModel: EvaluationViewModel = hiltViewModel()
 ) {
+    var showStudentList by remember { mutableStateOf(false) }
+    val students by viewModel.students.collectAsState()
+    val courses by viewModel.courses.collectAsState()
+
     Scaffold(
         containerColor = EcoColors.MintBackground,
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Panel Docente", fontWeight = FontWeight.Bold, color = Color.White) },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = EcoColors.DocentePrimary
-                )
-            )
+            Surface(
+                color = EcoColors.DocentePrimary,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(top = 16.dp, bottom = 16.dp, start = 16.dp, end = 16.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Panel Docente",
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                    IconButton(onClick = { showStudentList = true }) {
+                        Icon(Icons.Default.GroupAdd, contentDescription = "Asignar Estudiantes", tint = Color.White)
+                    }
+                    IconButton(onClick = onLogout) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.Logout,
+                            contentDescription = "Cerrar sesión",
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
         }
     ) { padding ->
         Column(
@@ -140,7 +182,111 @@ fun TeacherDashboardContent(
             }
         }
     }
+
+    if (showStudentList) {
+        val rooms by viewModel.rooms.collectAsState()
+        StudentAssignmentDialog(
+            students = students.filter { it.rol == com.example.myapplication.domain.model.UserRole.ESTUDIANTE },
+            courses = courses,
+            rooms = rooms,
+            onDismiss = { showStudentList = false },
+            onAssign = { studentUid, courseId ->
+                viewModel.updateStudentCourse(studentUid, courseId)
+            }
+        )
+    }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StudentAssignmentDialog(
+    students: List<com.example.myapplication.domain.model.User>,
+    courses: List<com.example.myapplication.domain.model.Course>,
+    rooms: List<com.example.myapplication.domain.model.Room>,
+    onDismiss: () -> Unit,
+    onAssign: (String, String) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Asignar Estudiantes") },
+        text = {
+            Box(modifier = Modifier.heightIn(max = 400.dp)) {
+                if (students.isEmpty()) {
+                    Text("No hay estudiantes registrados.")
+                } else {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(students) { student ->
+                            var expanded by remember { mutableStateOf(false) }
+                            val currentName = courses.find { it.id == student.courseId }?.nombre 
+                                ?: rooms.find { it.id == student.courseId }?.nombre 
+                                ?: "Sin asignar"
+
+                            Card(
+                                colors = CardDefaults.cardColors(containerColor = Color.White),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, EcoColors.Divider)
+                            ) {
+                                Column(modifier = Modifier.padding(8.dp)) {
+                                    Text(student.nombre, fontWeight = FontWeight.Bold)
+                                    Text(student.email, style = MaterialTheme.typography.bodySmall)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    
+                                    ExposedDropdownMenuBox(
+                                        expanded = expanded,
+                                        onExpandedChange = { expanded = !expanded }
+                                    ) {
+                                        OutlinedTextField(
+                                            value = currentName,
+                                            onValueChange = {},
+                                            readOnly = true,
+                                            label = { Text("Salón / Aula QR") },
+                                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                                            modifier = Modifier.fillMaxWidth().menuAnchor(),
+                                            textStyle = MaterialTheme.typography.bodySmall,
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
+                                        ExposedDropdownMenu(
+                                            expanded = expanded,
+                                            onDismissRequest = { expanded = false }
+                                        ) {
+                                            if (courses.isNotEmpty()) {
+                                                Text("SALONES", style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(8.dp))
+                                                courses.forEach { course ->
+                                                    DropdownMenuItem(
+                                                        text = { Text(course.nombre) },
+                                                        onClick = {
+                                                            onAssign(student.uid, course.id)
+                                                            expanded = false
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                            if (rooms.isNotEmpty()) {
+                                                Text("AULAS (QR)", style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(8.dp))
+                                                rooms.forEach { room ->
+                                                    DropdownMenuItem(
+                                                        text = { Text("${room.nombre} (${room.bloque})") },
+                                                        onClick = {
+                                                            onAssign(student.uid, room.id)
+                                                            expanded = false
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Cerrar") }
+        }
+    )
+}
+
 
 @Preview(showBackground = true)
 @Composable
@@ -148,7 +294,8 @@ fun TeacherDashboardPreview() {
     MyApplicationTheme {
         TeacherDashboardContent(
             recentEvaluations = emptyList(),
-            onScanClick = {}
+            onScanClick = {},
+            onLogout = {}
         )
     }
 }

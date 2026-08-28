@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">EcoLibertad IA</string>
+    <!-- Replace with your actual Web Client ID from Firebase Console / google-services.json -->
+    <string name="default_web_client_id">391565457119-placeholder.apps.googleusercontent.com</string>
 </resources>

@@ -8,6 +8,7 @@ sealed class Screen(val route: String) {
     object TeacherDashboard : Screen("teacher_dashboard")
     object StudentDashboard : Screen("student_dashboard")
     object AdminDashboard : Screen("admin_dashboard")
+    object InvitadoDashboard : Screen("invitado_dashboard")
     
     // Gestión Administrativa
     object UserManagement : Screen("user_management")
@@ -21,6 +22,7 @@ sealed class Screen(val route: String) {
     object EvidenceManagement : Screen("evidence_management")
     object Reports : Screen("reports")
     object Settings : Screen("settings")
+    object EnvironmentalDashboard : Screen("environmental_dashboard")
 
     object ComingSoon : Screen("coming_soon/{roleName}") {
         fun createRoute(roleName: String) = "coming_soon/$roleName"
