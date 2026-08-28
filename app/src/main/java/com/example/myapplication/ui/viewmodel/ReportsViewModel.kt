@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,9 +28,16 @@ class ReportsViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val averageScoreByCourse: StateFlow<Map<String, Double>> = combine(courses, evaluations) { courses, evaluations ->
-        evaluations.groupBy { it.courseId }
+        evaluations.filter { it.puntajeObtenido > 0 }
+            .groupBy { it.courseId.ifEmpty { it.roomId } }
             .mapValues { entry ->
                 entry.value.map { it.puntajeObtenido }.average()
             }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+
+    fun rateEvaluation(evaluationId: String, score: Int) {
+        viewModelScope.launch {
+            repository.updateEvaluationScore(evaluationId, score)
+        }
+    }
 }

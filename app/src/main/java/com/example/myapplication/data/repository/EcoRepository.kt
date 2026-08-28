@@ -404,4 +404,32 @@ class EcoRepository @Inject constructor(
     } catch (e: Exception) {
         Result.failure(e)
     }
+
+    suspend fun updateEvaluationScore(evaluationId: String, score: Int): Result<Unit> = try {
+        firestore.runTransaction { transaction ->
+            val evalRef = firestore.collection("evaluations").document(evaluationId)
+            val evaluation = transaction.get(evalRef)
+            
+            if (evaluation.exists()) {
+                val roomId = evaluation.getString("roomId") ?: ""
+                val courseId = evaluation.getString("courseId") ?: ""
+                
+                transaction.update(evalRef, "puntajeObtenido", score)
+                
+                // Actualizar puntos totales en Room o Course
+                if (courseId.isNotEmpty()) {
+                    val courseRef = firestore.collection("courses").document(courseId)
+                    val currentPoints = transaction.get(courseRef).getLong("puntosTotales") ?: 0L
+                    transaction.update(courseRef, "puntosTotales", currentPoints + (score).toLong())
+                } else if (roomId.isNotEmpty()) {
+                    val roomRef = firestore.collection("rooms").document(roomId)
+                    val currentPoints = transaction.get(roomRef).getLong("puntosTotales") ?: 0L
+                    transaction.update(roomRef, "puntosTotales", currentPoints + (score).toLong())
+                }
+            }
+        }.await()
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
 }

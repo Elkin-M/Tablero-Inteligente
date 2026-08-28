@@ -15,6 +15,7 @@ object EcoColors {
     
     // Superficies y Fondos (Consistentes)
     val MintBackground = Color(0xFFF8FBF9) // Más neutro y limpio
+    val AdminBackground = Color(0xFFF3E5F5) // Morado claro para el fondo de Admin
     val SurfaceWhite = Color(0xFFFFFFFF)
     
     // Texto y Contraste

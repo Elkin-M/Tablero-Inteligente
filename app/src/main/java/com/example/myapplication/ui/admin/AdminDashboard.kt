@@ -64,7 +64,7 @@ fun AdminDashboardContent(
     var selectedTab by remember { mutableStateOf(0) }
 
     Scaffold(
-        containerColor = EcoColors.MintBackground,
+        containerColor = EcoColors.AdminBackground,
         topBar = {
             Surface(
                 color = EcoColors.AdminPrimary,

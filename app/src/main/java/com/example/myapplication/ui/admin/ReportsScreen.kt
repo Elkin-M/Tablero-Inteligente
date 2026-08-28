@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -49,8 +50,10 @@ fun ReportsScreen(
                 )
             )
         },
-        containerColor = EcoColors.MintBackground
+        containerColor = EcoColors.AdminBackground
     ) { padding ->
+        val evaluations = viewModel.evaluations.collectAsState()
+        
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -58,6 +61,45 @@ fun ReportsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            item {
+                Text(
+                    "Revisiones de Docentes",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = EcoColors.TextDark
+                )
+            }
+
+            items(evaluations.value.filter { it.puntajeObtenido == 0 }.sortedByDescending { it.fecha }) { evaluation ->
+                val roomName = rooms.value.find { it.id == evaluation.roomId }?.nombre ?: evaluation.roomId
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Revisión de: $roomName", fontWeight = FontWeight.Bold)
+                        Text("Fecha: ${java.text.SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(java.util.Date(evaluation.fecha))}", style = MaterialTheme.typography.bodySmall)
+                        if (evaluation.observaciones.isNotEmpty()) {
+                            Text("Obs: ${evaluation.observaciones}", style = MaterialTheme.typography.bodySmall, color = EcoColors.TextMuted)
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            (1..5).forEach { score ->
+                                Button(
+                                    onClick = { viewModel.rateEvaluation(evaluation.id, score * 20) },
+                                    colors = ButtonDefaults.buttonColors(containerColor = EcoColors.AdminPrimary),
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("$score", color = Color.White)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             item {
                 Text(
                     "Resumen de Desempeño",
