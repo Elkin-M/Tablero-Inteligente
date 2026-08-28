@@ -35,6 +35,7 @@ fun EvidenceManagementScreen(
     viewModel: EvidenceViewModel = hiltViewModel()
 ) {
     val evaluations by viewModel.evidenceEvaluations.collectAsState()
+    val rooms by viewModel.rooms.collectAsState()
 
     Scaffold(
         topBar = {
@@ -85,7 +86,8 @@ fun EvidenceManagementScreen(
                     // Una evaluación puede tener múltiples fotos
                     evaluations.forEach { evaluation ->
                         items(evaluation.evidenciasUrls) { url ->
-                            EvidenceCard(url, evaluation)
+                            val roomName = rooms.find { it.id == evaluation.roomId }?.nombre ?: evaluation.roomId
+                            EvidenceCard(url, evaluation, roomName)
                         }
                     }
                 }
@@ -95,7 +97,7 @@ fun EvidenceManagementScreen(
 }
 
 @Composable
-fun EvidenceCard(imageUrl: String, evaluation: Evaluation) {
+fun EvidenceCard(imageUrl: String, evaluation: Evaluation, roomName: String) {
     val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
     val dateString = dateFormat.format(Date(evaluation.fecha))
     var showDialog by remember { mutableStateOf(false) }
@@ -111,7 +113,7 @@ fun EvidenceCard(imageUrl: String, evaluation: Evaluation) {
         Column {
             SubcomposeAsyncImage(
                 model = imageUrl,
-                contentDescription = "Evidencia de ${evaluation.roomId}",
+                contentDescription = "Evidencia de $roomName",
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(140.dp)
@@ -133,10 +135,11 @@ fun EvidenceCard(imageUrl: String, evaluation: Evaluation) {
             )
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(
-                    evaluation.roomId,
+                    text = roomName,
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
-                    maxLines = 1
+                    maxLines = 1,
+                    color = EcoColors.AdminPrimary
                 )
                 Text(
                     dateString,
@@ -169,7 +172,7 @@ fun EvidenceCard(imageUrl: String, evaluation: Evaluation) {
                         contentScale = ContentScale.Fit
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Salón: ${evaluation.roomId}", fontWeight = FontWeight.Bold)
+                    Text("Salón: $roomName", fontWeight = FontWeight.Bold)
                     Text("Fecha: $dateString")
                     Text("Puntos: ${evaluation.puntajeObtenido}")
                     if (evaluation.observaciones.isNotEmpty()) {

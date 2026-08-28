@@ -27,6 +27,7 @@ fun EvaluationManagementScreen(
     viewModel: ManagementViewModel = hiltViewModel()
 ) {
     val evaluations by viewModel.evaluations.collectAsState()
+    val rooms by viewModel.rooms.collectAsState()
     val sdf = remember { SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()) }
 
     Scaffold(
@@ -63,7 +64,8 @@ fun EvaluationManagementScreen(
                         Icon(Icons.Default.FactCheck, contentDescription = null, tint = EcoColors.AdminPrimary)
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
-                            Text("Salón ID: ${evaluation.roomId}", fontWeight = FontWeight.Bold, color = EcoColors.TextDark)
+                            val roomName = rooms.find { it.id == evaluation.roomId }?.nombre ?: evaluation.roomId
+                            Text("Salón: $roomName", fontWeight = FontWeight.Bold, color = EcoColors.TextDark)
                             Text("Fecha: ${sdf.format(Date(evaluation.fecha))}", style = MaterialTheme.typography.bodySmall, color = EcoColors.TextMuted)
                             Text("Puntaje: ${evaluation.puntajeObtenido} pts", style = MaterialTheme.typography.labelSmall, color = EcoColors.AdminPrimary)
                         }

@@ -99,5 +99,13 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideEcoRepository(
+        firestore: FirebaseFirestore,
+        @ApplicationContext context: Context
+    ): com.example.myapplication.data.repository.EcoRepository = 
+        com.example.myapplication.data.repository.EcoRepository(firestore, context)
+
+    @Provides
+    @Singleton
     fun provideDriveRepository(driveServiceHelper: DriveServiceHelper?): DriveRepository = DriveRepositoryImpl(driveServiceHelper)
 }

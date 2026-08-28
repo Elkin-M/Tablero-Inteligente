@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.myapplication.domain.model.BaselineDiagnostic
 import com.example.myapplication.domain.model.Evaluation
 import com.example.myapplication.domain.model.Indicator
 import com.example.myapplication.ui.theme.EcoColors
@@ -47,6 +48,13 @@ fun EvaluationForm(
 
     val indicatorScores = remember { mutableStateMapOf<String, Int>() }
     
+    // Sliders de diagnóstico inicial (0-10)
+    var limpieza by remember { mutableFloatStateOf(0f) }
+    var residuos by remember { mutableFloatStateOf(0f) }
+    var energia by remember { mutableFloatStateOf(0f) }
+    var mobiliario by remember { mutableFloatStateOf(0f) }
+    var participacion by remember { mutableFloatStateOf(0f) }
+
     var observaciones by remember { mutableStateOf("") }
     var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
     
@@ -84,19 +92,25 @@ fun EvaluationForm(
         }
         val totalPoints = finalScores.values.sum()
         
-        // Buscar el courseId asociado al roomId si es necesario, 
-        // o dejar que el ViewModel lo resuelva. 
-        // Por ahora pasamos el roomId como referencia.
-        
         val evaluation = Evaluation(
             roomId = roomId,
-            courseId = "", // Se intentará resolver en el repositorio/viewmodel si hay asociación
+            courseId = roomId, 
             puntajeObtenido = totalPoints,
             indicadores = finalScores,
             observaciones = observaciones,
             fecha = System.currentTimeMillis()
         )
-        viewModel.submitEvaluation(evaluation, selectedImages.map { it.toString() })
+
+        val diagnostic = BaselineDiagnostic(
+            roomId = roomId,
+            estadoLimpieza = limpieza.toInt(),
+            clasificacionResiduos = residuos.toInt(),
+            ahorroEnergia = energia.toInt(),
+            cuidadoMobiliario = mobiliario.toInt(),
+            participacionAmbiental = participacion.toInt()
+        )
+
+        viewModel.submitEvaluationWithDiagnostic(evaluation, diagnostic, selectedImages.map { it.toString() })
     }
 
     Scaffold(
@@ -151,6 +165,28 @@ fun EvaluationForm(
                         Spacer(modifier = Modifier.width(12.dp))
                         Text("Subiendo evidencias y guardando datos...", style = MaterialTheme.typography.bodySmall)
                     }
+                }
+            }
+
+            Text(
+                "Diagnóstico Inicial (0-10)",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.ExtraBold,
+                color = EcoColors.TextDark
+            )
+
+            Card(
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    DiagnosticSlider("Estado de Limpieza", limpieza) { limpieza = it }
+                    DiagnosticSlider("Clasificación de Residuos", residuos) { residuos = it }
+                    DiagnosticSlider("Ahorro de Energía", energia) { energia = it }
+                    DiagnosticSlider("Cuidado Mobiliario", mobiliario) { mobiliario = it }
+                    DiagnosticSlider("Participación Ambiental", participacion) { participacion = it }
                 }
             }
 
@@ -330,5 +366,35 @@ fun EvaluationForm(
             
             Spacer(modifier = Modifier.height(20.dp))
         }
+    }
+}
+
+@Composable
+fun DiagnosticSlider(label: String, value: Float, onValueChange: (Float) -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(label, style = MaterialTheme.typography.bodyMedium, color = EcoColors.TextDark)
+            Text(
+                "${value.toInt()}/10",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                color = EcoColors.DocentePrimary
+            )
+        }
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = 0f..10f,
+            steps = 9,
+            colors = SliderDefaults.colors(
+                thumbColor = EcoColors.DocentePrimary,
+                activeTrackColor = EcoColors.DocentePrimary,
+                inactiveTrackColor = EcoColors.DocentePrimary.copy(alpha = 0.1f)
+            )
+        )
     }
 }

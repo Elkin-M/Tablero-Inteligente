@@ -23,6 +23,9 @@ class ReportsViewModel @Inject constructor(
     val evaluations: StateFlow<List<Evaluation>> = repository.getEvaluationsFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val rooms: StateFlow<List<com.example.myapplication.domain.model.Room>> = repository.getRoomsFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     val averageScoreByCourse: StateFlow<Map<String, Double>> = combine(courses, evaluations) { courses, evaluations ->
         evaluations.groupBy { it.courseId }
             .mapValues { entry ->

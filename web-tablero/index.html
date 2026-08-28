@@ -1,857 +1,289 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tablero Ambiental - EcoLibertad</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proyecto Ecológico - Dashboard</title>
+
+  <!-- Fuentes Google: Poppins (Titulares) e Inter (Cuerpo) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+
+  <!-- Carga de Iconos (Lucide Icons) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
+    /* VARIABLES DE DISEÑO ECOLÓGICO */
     :root {
-      /* Paleta suave, tierra + verde salvia */
-      --sage-100: #EEF3E7;
-      --sage-200: #DCE8D2;
-      --sage-500: #7BAA7E;
-      --sage-600: #5E9468;
-      --sage-700: #4A7A57;
-      --clay-500: #E8A87C;
-      --clay-600: #DE8F5C;
-      --cream-bg: #FBF7EF;
-      --card-bg: #FFFFFF;
-      --text-dark: #3C4A3A;
-      --text-muted: #8B9689;
-      --border-soft: rgba(74, 122, 87, 0.08);
-      --shadow-soft: 0 4px 16px rgba(94, 148, 104, 0.10);
-      --live-color: #A8D08D;
+      --color-primary: #2E7D32;       /* Verde Bosque */
+      --color-accent: #4CAF50;        /* Verde Hoja */
+      --color-surface-light: #E8F5E9; /* Verde Menta Claro */
+      --color-text-main: #1B4332;     /* Verde Oscuro */
+      --color-background: #FFFFFF;    /* Blanco Puro */
+      --color-card-bg: #FFFFFF;
+      --shadow-sm: 0 4px 12px rgba(27, 67, 50, 0.06);
+
+      --font-heading: 'Poppins', sans-serif;
+      --font-body: 'Inter', sans-serif;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-      height: 100%;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      font-family: 'Nunito', system-ui, -apple-system, sans-serif;
-      background: linear-gradient(180deg, #FBF7EF 0%, #F5EFE0 100%);
-      color: var(--text-dark);
+      font-family: var(--font-body);
+      color: var(--color-text-main);
+      background-color: #F4F9F5;
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       min-height: 100vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
     }
 
-    h2, h3 {
-      font-family: 'Quicksand', 'Nunito', sans-serif;
-      font-weight: 700;
-      color: var(--text-dark);
-      letter-spacing: 0.01em;
-    }
-
-    /* ---------- NAVBAR ---------- */
-    header {
-      background: linear-gradient(135deg, var(--sage-600) 0%, var(--sage-700) 100%);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.6rem 1.75rem;
-      height: 64px;
-      flex-shrink: 0;
-      border-radius: 0 0 26px 26px;
-      box-shadow: 0 6px 20px rgba(74, 122, 87, 0.22);
-      position: relative;
-      z-index: 5;
-      gap: 0.75rem;
-    }
-
-    header .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      font-family: 'Quicksand', sans-serif;
-      font-size: 1.35rem;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-      min-width: 0;
-    }
-
-    header .brand img.logo {
-      height: 48px;
-      width: auto;
-      object-fit: contain;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-      flex-shrink: 0;
-    }
-
-    header .brand span.brand-text {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    header .status {
-      display: flex;
-      align-items: center;
-      gap: 0.85rem;
-      font-size: 0.85rem;
-      flex-shrink: 0;
-    }
-
-    #connStatus {
-      padding: 0.35rem 0.85rem;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.16);
-      font-size: 0.75rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: background 0.3s ease;
-    }
-
-    #connStatus.live {
-      background: rgba(255,255,255,0.24);
-    }
-
-    #connStatus.live .live-dot {
-      background: var(--live-color);
-      box-shadow: 0 0 8px var(--live-color);
-    }
-
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.5);
-      transition: all 0.3s;
-      flex-shrink: 0;
-    }
-
-    #clock {
-      font-weight: 700;
-      background: rgba(255,255,255,0.14);
-      padding: 0.35rem 0.75rem;
-      border-radius: 999px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    /* ---------- LAYOUT ---------- */
-    main {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 210px 1fr;
-      gap: 0.9rem;
-      padding: 0.9rem 1.1rem;
-      overflow: hidden;
-      min-height: 0;
-    }
-
-    .sidebar {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      overflow: hidden;
-      min-height: 0;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border-radius: 20px;
-      padding: 0.9rem 1rem;
-      box-shadow: var(--shadow-soft);
-      border: 1px solid var(--border-soft);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .card h3 {
-      font-size: 0.85rem;
-      margin-bottom: 0.6rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      flex-shrink: 0;
-    }
-
-    .card h3::before {
-      content: "";
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--sage-500);
-      flex-shrink: 0;
-    }
-
-    .ranking-container {
-      flex: 1;
-      overflow-y: auto;
-      padding-right: 0.15rem;
-      min-height: 0;
-    }
-
-    .ranking-container::-webkit-scrollbar { width: 5px; }
-    .ranking-container::-webkit-scrollbar-thumb { background: var(--sage-200); border-radius: 10px; }
-
-    .ranking-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.5rem 0.7rem;
-      border-radius: 12px;
-      margin-bottom: 0.35rem;
-      font-size: 0.78rem;
-      font-weight: 700;
-      background: var(--sage-100);
-      color: var(--sage-700);
-      transition: all 0.35s ease;
-    }
-
-    .ranking-item.active {
-      background: linear-gradient(135deg, var(--sage-500), var(--sage-600));
-      color: white;
-      transform: scale(1.03);
-      box-shadow: 0 4px 12px rgba(94, 148, 104, 0.35);
-    }
-
-    .content-col {
-      display: flex;
-      flex-direction: column;
-      gap: 0.9rem;
-      overflow: hidden;
-      min-height: 0;
-    }
-
-    /* ---------- CAROUSEL ---------- */
-    .carousel-section {
-      height: 42%;
-      background: var(--card-bg);
-      border-radius: 24px;
-      padding: 1rem 1.2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.55rem;
-      box-shadow: var(--shadow-soft);
-      border: 1px solid var(--border-soft);
-      min-height: 0;
-    }
-
-    .carousel-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-shrink: 0;
-      gap: 0.6rem;
-    }
-
-    #roomName {
-      font-size: 1.05rem;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .timer-bar {
-      width: 130px;
-      height: 6px;
-      background: var(--sage-100);
-      border-radius: 999px;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-
-    .timer-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--sage-500), var(--clay-500));
-      width: 0%;
-      border-radius: 999px;
-    }
-
-    .carousel-grid {
-      display: grid;
-      grid-template-columns: 1.3fr 1fr;
-      gap: 1.1rem;
-      flex: 1;
-      overflow: hidden;
-      min-height: 0;
-    }
-
-    .photo-box {
-      border-radius: 18px;
-      overflow: hidden;
-      background: var(--sage-100);
-      height: 100%;
-      box-shadow: inset 0 0 0 1px var(--border-soft);
-    }
-
-    .photo-box img {
+    /* CONTENEDOR PRINCIPAL */
+    .dashboard {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      max-width: 420px;
+      background-color: var(--color-background);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
     }
 
-    .room-info {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 0.5rem;
-      min-height: 0;
-    }
-
-    .info-pill {
-      background: var(--sage-100);
-      padding: 0.7rem 0.9rem;
-      border-radius: 14px;
+    /* ENCABEZADO */
+    .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.85rem;
-      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .header-title {
+      font-family: var(--font-heading);
+      color: var(--color-primary);
+      font-size: 1.25rem;
+    }
+
+    .header-badge {
+      background-color: var(--color-surface-light);
+      color: var(--color-primary);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
       font-weight: 600;
-      gap: 0.5rem;
-    }
-
-    .info-pill span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .info-pill b {
-      color: var(--sage-700);
-      font-family: 'Quicksand', sans-serif;
-      font-size: 0.95rem;
-      flex-shrink: 0;
-    }
-
-    /* ---------- MIDDLE ROW ---------- */
-    .middle-row {
-      height: 35%;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.9rem;
-      min-height: 0;
-    }
-
-    .category-list {
-      flex: 1;
-      overflow-y: auto;
-      padding-right: 0.15rem;
-      min-height: 0;
-    }
-
-    .category-list::-webkit-scrollbar { width: 5px; }
-    .category-list::-webkit-scrollbar-thumb { background: var(--sage-200); border-radius: 10px; }
-
-    .cat-item {
-      margin-bottom: 0.65rem;
-    }
-
-    .cat-top {
       display: flex;
-      justify-content: space-between;
-      font-size: 0.75rem;
-      font-weight: 700;
-      margin-bottom: 0.3rem;
-      color: var(--text-dark);
-      gap: 0.5rem;
+      align-items: center;
+      gap: 6px;
     }
 
-    .cat-top span:first-child {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    /* TARJETA DE RESUMEN PRINCIPAL */
+    .hero-card {
+      background-color: var(--color-surface-light);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
     }
 
-    .cat-top span:last-child {
-      flex-shrink: 0;
+    .hero-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
     }
 
-    .progress {
-      height: 9px;
-      background: var(--sage-100);
-      border-radius: 999px;
-      overflow: hidden;
+    .icon-wrapper {
+      background-color: var(--color-primary);
+      color: white;
+      padding: 10px;
+      border-radius: 12px;
+      display: flex;
     }
 
-    .progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--sage-500), var(--sage-600));
-      border-radius: 999px;
-      transition: width 0.6s ease;
+    .hero-title {
+      font-family: var(--font-heading);
+      color: var(--color-primary);
+      font-size: 1.1rem;
     }
 
-    .evidence-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-      gap: 0.55rem;
-      flex: 1;
-      min-height: 0;
+    .hero-desc {
+      font-size: 0.9rem;
+      line-height: 1.4;
+      opacity: 0.85;
+      margin-bottom: 16px;
     }
 
-    .evidence-img {
-      border-radius: 14px;
-      overflow: hidden;
-      background: var(--sage-100);
-      box-shadow: inset 0 0 0 1px var(--border-soft);
-    }
-
-    .evidence-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-    /* ---------- BOTTOM ROW ---------- */
-    .bottom-row {
-      height: 18%;
-      display: grid;
-      grid-template-columns: 1fr 1.2fr 1fr;
-      gap: 0.9rem;
-      min-height: 0;
-    }
-
-    .stat-mini-grid {
+    /* MÉTRICAS */
+    .stats-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
-      flex: 1;
-      min-height: 0;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
-    .stat-mini {
-      background: linear-gradient(160deg, var(--sage-100), var(--sage-200));
-      padding: 0.5rem;
-      border-radius: 14px;
-      text-align: center;
+    .stat-card {
+      background: var(--color-card-bg);
+      padding: 12px 16px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-card i {
+      color: var(--color-accent);
+    }
+
+    .stat-val {
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      opacity: 0.7;
+    }
+
+    /* BOTONES DE ACCIÓN */
+    .btn-primary {
+      width: 100%;
+      background-color: var(--color-primary);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      background-color: #236327;
+    }
+
+    /* LISTA DE ACTIVIDADES */
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: 0.95rem;
+      color: var(--color-primary);
+      margin-bottom: 12px;
+    }
+
+    .activity-list {
+      list-style: none;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      gap: 10px;
     }
 
-    .stat-mini span {
-      font-family: 'Quicksand', sans-serif;
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--sage-700);
-    }
-    .stat-mini b { font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700; }
-
-    .tip-text {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      line-height: 1.45;
-      font-weight: 600;
+    .activity-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background-color: #F8FCF8;
+      border: 1px solid var(--color-surface-light);
+      border-radius: 10px;
     }
 
-    .bottom-row p {
-      font-size: 0.78rem;
-      color: var(--text-dark);
-      margin-bottom: 0.25rem;
-      font-weight: 600;
+    .activity-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
     }
 
-    .bottom-row p b { color: var(--clay-600); }
-
-    /* =====================================================
-       RESPONSIVE — TABLETS (<= 900px)
-       ===================================================== */
-    @media (max-width: 900px) {
-      body {
-        overflow-y: auto;
-        overflow-x: hidden;
-      }
-
-      main {
-        grid-template-columns: 1fr;
-        overflow: visible;
-        padding: 0.75rem;
-      }
-
-      .sidebar {
-        order: 2;
-        height: auto;
-      }
-
-      .sidebar .card {
-        height: auto !important;
-        max-height: 260px;
-      }
-
-      .content-col {
-        order: 1;
-        overflow: visible;
-      }
-
-      .carousel-section,
-      .middle-row,
-      .bottom-row {
-        height: auto;
-      }
-
-      .carousel-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .photo-box {
-        min-height: 160px;
-      }
-
-      .middle-row {
-        grid-template-columns: 1fr;
-      }
-
-      .category-list,
-      .evidence-grid {
-        max-height: none;
-      }
-
-      .card {
-        max-height: none;
-      }
-
-      .bottom-row {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .bottom-row .card:nth-child(2) {
-        grid-column: 1 / -1;
-      }
-    }
-
-    /* =====================================================
-       RESPONSIVE — TELÉFONOS (<= 600px)
-       ===================================================== */
-    @media (max-width: 600px) {
-      header {
-        padding: 0.55rem 0.9rem;
-        height: auto;
-        min-height: 58px;
-        border-radius: 0 0 18px 18px;
-        flex-wrap: wrap;
-      }
-
-      header .brand {
-        font-size: 1rem;
-        gap: 0.5rem;
-      }
-
-      header .brand img.logo {
-        height: 32px;
-      }
-
-      header .brand span.brand-text {
-        max-width: 46vw;
-      }
-
-      #connStatus {
-        font-size: 0.65rem;
-        padding: 0.25rem 0.6rem;
-      }
-
-      #clock {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.55rem;
-      }
-
-      main {
-        padding: 0.6rem;
-        gap: 0.65rem;
-      }
-
-      .card {
-        border-radius: 16px;
-        padding: 0.75rem 0.85rem;
-      }
-
-      .sidebar .card {
-        max-height: 200px;
-      }
-
-      .carousel-section {
-        border-radius: 18px;
-        padding: 0.85rem 0.9rem;
-      }
-
-      .carousel-top {
-        flex-wrap: wrap;
-      }
-
-      #roomName {
-        font-size: 0.95rem;
-        white-space: normal;
-      }
-
-      .timer-bar {
-        width: 100%;
-      }
-
-      /* stack photo above stats on very small screens */
-      .carousel-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .photo-box {
-        min-height: 140px;
-      }
-
-      .evidence-grid {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(3, 1fr);
-        aspect-ratio: 1 / 1;
-      }
-
-      .bottom-row {
-        grid-template-columns: 1fr;
-      }
-
-      .bottom-row .card:nth-child(2) {
-        grid-column: auto;
-      }
-
-      .stat-mini span { font-size: 1.05rem; }
+    .activity-info i {
+      color: var(--color-primary);
+      width: 18px;
+      height: 18px;
     }
   </style>
 </head>
 <body>
 
-<header>
-  <div class="brand">
-    <img src="logo.png" alt="EcoLibertad Logo" class="logo">
-    <span class="brand-text">Tablero Ambiental EcoLibertad</span>
-  </div>
-  <div class="status">
-    <div id="connStatus">
-      <div class="live-dot"></div>
-      <span id="connLabel">Conectando...</span>
+<main class="dashboard">
+  <!-- Header -->
+  <header class="header">
+    <h1 class="header-title">Ruta Ecológica</h1>
+    <div class="header-badge">
+      <i data-lucide="leaf" style="width: 14px; height: 14px;"></i>
+      Activo
     </div>
-    <span id="clock"></span>
-  </div>
-</header>
+  </header>
 
-<main>
-  <aside class="sidebar">
-    <div class="card" style="height: 100%;">
-      <h3>Ranking Salones</h3>
-      <div class="ranking-container" id="rankingList">
-        <p style="font-size: 0.7rem; color: #999;">Cargando datos...</p>
+  <!-- Tarjeta Principal -->
+  <section class="hero-card">
+    <div class="hero-header">
+      <div class="icon-wrapper">
+        <i data-lucide="sprout"></i>
       </div>
+      <h2 class="hero-title">Impacto Ambiental</h2>
     </div>
-  </aside>
+    <p class="hero-desc">
+      Monitoreo de material recolectado y puntos depositados en contenedores inteligentes.
+    </p>
 
-  <div class="content-col">
-    <section class="carousel-section">
-      <div class="carousel-top">
-        <h2 id="roomName">Iniciando...</h2>
-        <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
-      </div>
-      <div class="carousel-grid">
-        <div class="photo-box"><img id="roomImg" src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600" alt="" /></div>
-        <div class="room-info" id="roomStats">
-          <div class="info-pill"><span>Puntaje Acumulado</span><b id="rPts">-</b></div>
-          <div class="info-pill"><span>Evaluaciones</span><b id="rEvs">-</b></div>
-          <div class="info-pill"><span>Última Revisión</span><b id="rDate">-</b></div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <i data-lucide="recycling"></i>
+        <div>
+          <span class="stat-val">12.5 kg</span>
+          <span class="stat-label">Reciclado</span>
         </div>
       </div>
-    </section>
-
-    <div class="middle-row">
-      <div class="card">
-        <h3>Impacto por Categoría</h3>
-        <div class="category-list" id="catList"></div>
-      </div>
-      <div class="card">
-        <h3>Evidencias Recientes</h3>
-        <div class="evidence-grid" id="evGrid"></div>
-      </div>
-    </div>
-
-    <div class="bottom-row">
-      <div class="card">
-        <h3>Tip del Día</h3>
-        <p class="tip-text" id="tipText">Cierra el grifo mientras te enjabonas las manos. ¡Cada gota cuenta!</p>
-      </div>
-      <div class="card">
-        <h3>Métricas Globales</h3>
-        <div class="stat-mini-grid">
-          <div class="stat-mini"><span id="gPts">0</span><b>Puntos</b></div>
-          <div class="stat-mini"><span id="gEvs">0</span><b>Revisiones</b></div>
+      <div class="stat-card">
+        <i data-lucide="award"></i>
+        <div>
+          <span class="stat-val">350 Pts</span>
+          <span class="stat-label">Acumulados</span>
         </div>
       </div>
-      <div class="card">
-        <h3>Próximos Eventos</h3>
-        <p>&#128197; <b>Oct 21:</b> Día del Árbol</p>
-        <p>&#128197; <b>Nov 05:</b> Feria de Reciclaje</p>
-      </div>
     </div>
-  </div>
+
+    <button class="btn-primary">
+      <i data-lucide="qr-code"></i>
+      Escanear Contenedor
+    </button>
+  </section>
+
+  <!-- Historial de Actividad -->
+  <section>
+    <h3 class="section-title">Últimos Registros</h3>
+    <ul class="activity-list">
+      <li class="activity-item">
+        <div class="activity-info">
+          <i data-lucide="check-circle-2"></i>
+          <span>Depósito PET (Botellas)</span>
+        </div>
+        <span style="font-size: 0.8rem; opacity: 0.6;">Hoy</span>
+      </li>
+      <li class="activity-item">
+        <div class="activity-info">
+          <i data-lucide="check-circle-2"></i>
+          <span>Depósito de Cartón</span>
+        </div>
+        <span style="font-size: 0.8rem; opacity: 0.6;">Ayer</span>
+      </li>
+    </ul>
+  </section>
 </main>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-  import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBt1CCrUlt_wrfU574BbOzI0RfQjRHWUXE",
-    authDomain: "tablero-inteligente.firebaseapp.com",
-    projectId: "tablero-inteligente",
-    storageBucket: "tablero-inteligente.firebasestorage.app",
-    messagingSenderId: "391565457119",
-    appId: "1:391565457119:web:ffd9191a85e9f3a0501b6a"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  let rawRooms = [];
-  let rawEvs = [];
-  let combinedData = [];
-  let currentIndex = 0;
-  let elapsed = 0;
-  const DURATION = 8000;
-
-  const tips = [
-    "Cierra el grifo mientras te enjabonas las manos. ¡Cada gota cuenta!",
-    "Usa ambas caras del papel antes de reciclarlo.",
-    "Apaga las luces al salir de un salón vacío.",
-    "Trae tu propio termo para evitar botellas de plástico.",
-    "Separa tus residuos: orgánicos, plásticos y papel."
-  ];
-
-  function processData() {
-    const roomPoints = {};
-    const roomCount = {};
-    const roomPhotos = {};
-    const roomDates = {};
-    const globalCats = {};
-    let globalPoints = 0;
-
-    rawEvs.forEach(e => {
-      const p = e.puntajeObtenido || 0;
-      const rid = e.roomId;
-      globalPoints += p;
-
-      roomPoints[rid] = (roomPoints[rid] || 0) + p;
-      roomCount[rid] = (roomCount[rid] || 0) + 1;
-
-      if (e.evidenciasUrls?.length) {
-        if (!roomPhotos[rid]) roomPhotos[rid] = [];
-        roomPhotos[rid].push(...e.evidenciasUrls);
-      }
-
-      if (!roomDates[rid] || e.fecha > roomDates[rid]) {
-        roomDates[rid] = e.fecha;
-      }
-
-      Object.entries(e.indicadores || {}).forEach(([k, v]) => {
-        globalCats[k] = (globalCats[k] || 0) + v;
-      });
-    });
-
-    combinedData = rawRooms.map(r => ({
-      ...r,
-      pts: roomPoints[r.id] || 0,
-      count: roomCount[r.id] || 0,
-      photos: roomPhotos[r.id] || [],
-      lastDate: roomDates[r.id] ? new Date(roomDates[r.id]).toLocaleDateString() : 'Sin datos'
-    })).sort((a, b) => b.pts - a.pts);
-
-    renderGlobal(globalPoints, rawEvs.length, globalCats);
-    renderEvidenceGrid();
-    updateCarousel();
-  }
-
-  function renderGlobal(pts, totalEvs, cats) {
-    document.getElementById('gPts').textContent = pts.toLocaleString();
-    document.getElementById('gEvs').textContent = totalEvs;
-
-    const catList = document.getElementById('catList');
-    const sortedCats = Object.entries(cats).sort((a,b) => b[1] - a[1]);
-    const max = Math.max(...Object.values(cats), 1);
-
-    catList.innerHTML = sortedCats.map(([name, val]) => `
-      <div class="cat-item">
-        <div class="cat-top"><span>${name}</span><span>${val} pts</span></div>
-        <div class="progress"><div class="progress-bar" style="width: ${(val/max)*100}%"></div></div>
-      </div>
-    `).join('');
-  }
-
-  function renderEvidenceGrid() {
-    const allPhotos = rawEvs.flatMap(e => e.evidenciasUrls || []).slice(0, 8);
-    const grid = document.getElementById('evGrid');
-    grid.innerHTML = allPhotos.map(url => `
-      <div class="evidence-img"><img src="${url}" loading="lazy" /></div>
-    `).join('');
-  }
-
-  function renderRanking() {
-    const list = document.getElementById('rankingList');
-    list.innerHTML = combinedData.slice(0, 15).map((r, i) => `
-      <div class="ranking-item ${i === (currentIndex % combinedData.length) ? 'active' : ''}">
-        <span>${i + 1}. ${r.nombre}</span>
-        <span>${r.pts}</span>
-      </div>
-    `).join('');
-  }
-
-  function updateCarousel() {
-    if (combinedData.length === 0) return;
-
-    const cur = combinedData[currentIndex % combinedData.length];
-    document.getElementById('roomName').textContent = cur.nombre;
-    document.getElementById('rPts').textContent = cur.pts;
-    document.getElementById('rEvs').textContent = cur.count;
-    document.getElementById('rDate').textContent = cur.lastDate;
-
-    const img = document.getElementById('roomImg');
-    if (cur.photos.length > 0) {
-      img.src = cur.photos[Math.floor(Math.random() * cur.photos.length)];
-    } else {
-      img.src = "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600";
-    }
-
-    renderRanking();
-    document.getElementById('tipText').textContent = tips[Math.floor(Math.random() * tips.length)];
-  }
-
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      const conn = document.getElementById('connStatus');
-      conn.classList.add('live');
-      document.getElementById('connLabel').textContent = 'En vivo';
-
-      onSnapshot(collection(db, 'rooms'), snap => {
-        rawRooms = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        if (rawEvs.length) processData();
-      });
-
-      onSnapshot(collection(db, 'evaluations'), snap => {
-        rawEvs = snap.docs.map(d => d.data());
-        if (rawRooms.length) processData();
-      });
-    }
-  });
-
-  signInAnonymously(auth);
-
-  setInterval(() => {
-    if (combinedData.length > 0) {
-      elapsed += 200;
-      document.getElementById('timerFill').style.width = (elapsed / DURATION) * 100 + '%';
-      if (elapsed >= DURATION) {
-        elapsed = 0;
-        currentIndex++;
-        updateCarousel();
-      }
-    }
-  }, 200);
-
-  setInterval(() => {
-    document.getElementById('clock').textContent = new Date().toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
-  }, 1000);
+<!-- Script para inicializar los iconos -->
+<script>
+  lucide.createIcons();
 </script>
-
 </body>
 </html>

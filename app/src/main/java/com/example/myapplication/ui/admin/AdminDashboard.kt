@@ -26,6 +26,9 @@ import com.example.myapplication.ui.theme.EcoColors
 import com.example.myapplication.ui.viewmodel.RankingViewModel
 import com.example.myapplication.ui.viewmodel.AuthViewModel
 import com.example.myapplication.ui.navigation.Screen
+import com.example.myapplication.util.QRGenerator
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.asImageBitmap
 
 @Composable
 fun AdminDashboard(
@@ -207,6 +210,65 @@ fun TabInicio(ranking: List<Course>, totalSalones: Int, navController: NavContro
                     color = EcoColors.TextDark
                 )
                 LeaderCard(course = ranking.first())
+            }
+        }
+
+        item {
+            InfoBox(
+                url = "https://tablero-inteligente.web.app/"
+            )
+        }
+    }
+}
+
+@Composable
+fun InfoBox(url: String) {
+    var showInfoBox by remember { mutableStateOf(true) }
+    if (!showInfoBox) return
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = EcoColors.AdminPrimary.copy(alpha = 0.1f)),
+        shape = RoundedCornerShape(16.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, EcoColors.AdminPrimary.copy(alpha = 0.2f))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Info, contentDescription = null, tint = EcoColors.AdminPrimary)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Información del Portal", fontWeight = FontWeight.Bold, color = EcoColors.AdminPrimary)
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton(onClick = { showInfoBox = false }, modifier = Modifier.size(24.dp)) {
+                    Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = EcoColors.TextMuted)
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Accede al tablero web para reportes detallados y análisis de IA.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = EcoColors.TextDark
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        url,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = EcoColors.AdminPrimary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                val qrBitmap = remember(url) { QRGenerator.generateQRCode(url) }
+                qrBitmap?.let {
+                    Image(
+                        bitmap = it.asImageBitmap(),
+                        contentDescription = "Web QR",
+                        modifier = Modifier.size(60.dp)
+                    )
+                }
             }
         }
     }

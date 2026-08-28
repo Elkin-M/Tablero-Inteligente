@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.repository.EcoRepository
 import com.example.myapplication.domain.model.Evaluation
+import com.example.myapplication.domain.model.Room
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,13 @@ class EvidenceViewModel @Inject constructor(
         .map { evaluations ->
             evaluations.filter { it.evidenciasUrls.isNotEmpty() }
         }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    val rooms: StateFlow<List<Room>> = repository.getRoomsFlow()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

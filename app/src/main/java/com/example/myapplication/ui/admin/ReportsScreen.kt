@@ -32,6 +32,7 @@ fun ReportsScreen(
 ) {
     val avgScores = viewModel.averageScoreByCourse.collectAsState()
     val courses = viewModel.courses.collectAsState()
+    val rooms = viewModel.rooms.collectAsState()
 
     Scaffold(
         topBar = {
@@ -96,27 +97,35 @@ fun ReportsScreen(
             item {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    "Puntajes Promedio por Salón",
+                    "Puntajes Promedio por Salón/Aula",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = EcoColors.TextDark
                 )
             }
 
-            items(courses.value) { course ->
-                val avg = avgScores.value[course.id] ?: 0.0
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+            val courseList = courses.value.map { it.id to it.nombre }
+            val roomList = rooms.value.map { it.id to it.nombre }
+            val allItems = (courseList + roomList).distinctBy { it.first }
+
+            items(allItems) { pair ->
+                val id = pair.first
+                val nombre = pair.second
+                val avg = avgScores.value[id] ?: 0.0
+                if (avgScores.value.containsKey(id)) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
-                        Text(course.nombre, fontWeight = FontWeight.Bold)
-                        Text(String.format(Locale.getDefault(), "%.2f", avg), color = EcoColors.AdminPrimary, fontWeight = FontWeight.Bold)
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(nombre, fontWeight = FontWeight.Bold)
+                            Text(String.format(Locale.getDefault(), "%.2f", avg), color = EcoColors.AdminPrimary, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }

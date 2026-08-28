@@ -55,7 +55,8 @@ fun TeacherDashboard(
                     popUpTo(Screen.TeacherDashboard.route) { inclusive = true }
                 }
             }
-        }
+        },
+        viewModel = viewModel
     )
 }
 
@@ -65,11 +66,12 @@ fun TeacherDashboardContent(
     recentEvaluations: List<Evaluation>,
     onScanClick: () -> Unit,
     onLogout: () -> Unit,
-    viewModel: EvaluationViewModel = hiltViewModel()
+    viewModel: EvaluationViewModel
 ) {
     var showStudentList by remember { mutableStateOf(false) }
     val students by viewModel.students.collectAsState()
     val courses by viewModel.courses.collectAsState()
+    val rooms by viewModel.rooms.collectAsState()
 
     Scaffold(
         containerColor = EcoColors.MintBackground,
@@ -166,8 +168,9 @@ fun TeacherDashboardContent(
                 modifier = Modifier.weight(1f)
             ) {
                 items(recentEvaluations) { evaluation ->
+                    val roomName = rooms.find { it.id == evaluation.roomId }?.nombre ?: evaluation.roomId
                     ListItem(
-                        headlineContent = { Text("Salón ${evaluation.roomId}", fontWeight = FontWeight.Bold, color = EcoColors.TextDark) },
+                        headlineContent = { Text("Salón $roomName", fontWeight = FontWeight.Bold, color = EcoColors.TextDark) },
                         supportingContent = { 
                             val date = java.text.SimpleDateFormat("dd/MM HH:mm", java.util.Locale.getDefault())
                                 .format(java.util.Date(evaluation.fecha))
@@ -184,7 +187,6 @@ fun TeacherDashboardContent(
     }
 
     if (showStudentList) {
-        val rooms by viewModel.rooms.collectAsState()
         StudentAssignmentDialog(
             students = students.filter { it.rol == com.example.myapplication.domain.model.UserRole.ESTUDIANTE },
             courses = courses,
@@ -291,11 +293,11 @@ fun StudentAssignmentDialog(
 @Preview(showBackground = true)
 @Composable
 fun TeacherDashboardPreview() {
+    // Para el preview necesitamos un viewModel mock o no usarlo en el preview
+    // Por simplicidad, ajustamos el preview para que compile
     MyApplicationTheme {
-        TeacherDashboardContent(
-            recentEvaluations = emptyList(),
-            onScanClick = {},
-            onLogout = {}
-        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            Text("Teacher Dashboard Preview (Requires ViewModel)")
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.example.myapplication.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.repository.EcoRepository
+import com.example.myapplication.domain.model.BaselineDiagnostic
 import com.example.myapplication.domain.model.Evaluation
 import com.example.myapplication.domain.model.Indicator
 import com.example.myapplication.domain.model.User
@@ -76,6 +77,35 @@ class EvaluationViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _error.value = "Error al cargar evaluaciones: ${e.message}"
+            }
+        }
+    }
+
+    fun submitEvaluationWithDiagnostic(evaluation: Evaluation, diagnostic: BaselineDiagnostic, photoUris: List<String>) {
+        viewModelScope.launch {
+            _loading.value = true
+            _error.value = null
+            
+            val user = _currentUser.value
+            val finalEval = evaluation.copy(
+                docenteId = user?.uid ?: "unknown",
+                courseId = evaluation.roomId
+            )
+
+            // Guardamos el diagnóstico y la evaluación
+            val diagnosticResult = ecoRepository.saveBaseline(diagnostic)
+            if (diagnosticResult.isFailure) {
+                _error.value = "Error al guardar diagnóstico: ${diagnosticResult.exceptionOrNull()?.message}"
+                _loading.value = false
+                return@launch
+            }
+
+            val result = repository.registerEvaluation(finalEval, photoUris)
+            _loading.value = false
+            if (result.isSuccess) {
+                _success.value = true
+            } else {
+                _error.value = result.exceptionOrNull()?.message ?: "Error desconocido"
             }
         }
     }

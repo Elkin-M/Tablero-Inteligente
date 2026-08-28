@@ -76,13 +76,6 @@ fun RoomManagementScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-            if (showInfoBox) {
-                InfoBox(
-                    onDismiss = { showInfoBox = false },
-                    url = "https://ecolibertad-ia.web.app" // Reemplazar con URL real
-                )
-            }
-
             if (rooms.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("No hay aulas registradas", color = EcoColors.TextMuted)
@@ -127,136 +120,6 @@ fun RoomManagementScreen(
             )
         }
     }
-}
-
-@Composable
-fun InfoBox(onDismiss: () -> Unit, url: String) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = EcoColors.AdminPrimary.copy(alpha = 0.1f)),
-        shape = RoundedCornerShape(16.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, EcoColors.AdminPrimary.copy(alpha = 0.2f))
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Info, contentDescription = null, tint = EcoColors.AdminPrimary)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Información del Portal", fontWeight = FontWeight.Bold, color = EcoColors.AdminPrimary)
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = onDismiss, modifier = Modifier.size(24.dp)) {
-                    Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = EcoColors.TextMuted)
-                }
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        "Accede al tablero web para reportes detallados y análisis de IA.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = EcoColors.TextDark
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        url,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = EcoColors.AdminPrimary,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                val qrBitmap = remember(url) { QRGenerator.generateQRCode(url) }
-                qrBitmap?.let {
-                    Image(
-                        bitmap = it.asImageBitmap(),
-                        contentDescription = "Web QR",
-                        modifier = Modifier.size(60.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun RoomItem(room: Room, onToggleActive: () -> Unit, onShowQR: () -> Unit, onDelete: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.MeetingRoom, contentDescription = null, tint = EcoColors.AdminPrimary)
-                Spacer(modifier = Modifier.width(16.dp))
-                Column {
-                    Text(room.nombre, fontWeight = FontWeight.Bold, color = EcoColors.TextDark)
-                    Text(room.bloque, style = MaterialTheme.typography.bodySmall, color = EcoColors.TextMuted)
-                }
-            }
-            
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onShowQR) {
-                    Icon(Icons.Default.QrCode, contentDescription = "Generar QR", tint = EcoColors.AdminPrimary)
-                }
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red)
-                }
-                Switch(
-                    checked = room.active,
-                    onCheckedChange = { onToggleActive() },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = EcoColors.AdminPrimary,
-                        checkedTrackColor = EcoColors.AdminPrimary.copy(alpha = 0.5f)
-                    )
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun QRDialog(room: Room, onDismiss: () -> Unit, onDownload: (Bitmap) -> Unit) {
-    val qrBitmap = remember(room.id) { QRGenerator.generateQRCode(room.id) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Código QR: ${room.nombre}") },
-        text = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                qrBitmap?.let {
-                    Image(
-                        bitmap = it.asImageBitmap(),
-                        contentDescription = "QR Code",
-                        modifier = Modifier.size(200.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Escanea este código para calificar el salón", style = MaterialTheme.typography.bodySmall)
-                } ?: Text("Error al generar QR")
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { qrBitmap?.let { onDownload(it) } },
-                colors = ButtonDefaults.buttonColors(containerColor = EcoColors.AdminPrimary)
-            ) {
-                Icon(Icons.Default.Download, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Descargar QR")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cerrar") }
-        }
-    )
 }
 
 fun saveQRToGallery(context: Context, bitmap: Bitmap, filename: String) {
@@ -403,5 +266,116 @@ fun SliderIndicator(
             steps = 9,
             colors = SliderDefaults.colors(thumbColor = EcoColors.AdminPrimary, activeTrackColor = EcoColors.AdminPrimary)
         )
+    }
+}
+
+@Composable
+fun RoomItem(
+    room: Room,
+    onToggleActive: () -> Unit,
+    onShowQR: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = room.nombre,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = EcoColors.TextDark
+                )
+                Text(
+                    text = room.bloque,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = EcoColors.TextMuted
+                )
+            }
+            
+            IconButton(onClick = onShowQR) {
+                Icon(Icons.Default.QrCode, contentDescription = "QR", tint = EcoColors.AdminPrimary)
+            }
+            
+            Switch(
+                checked = room.active,
+                onCheckedChange = { onToggleActive() },
+                colors = SwitchDefaults.colors(checkedThumbColor = EcoColors.AdminPrimary)
+            )
+            
+            IconButton(onClick = onDelete) {
+                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red.copy(alpha = 0.7f))
+            }
+        }
+    }
+}
+
+@Composable
+fun QRDialog(
+    room: Room,
+    onDismiss: () -> Unit,
+    onDownload: (Bitmap) -> Unit
+) {
+    val qrBitmap = remember(room.id) {
+        QRGenerator.generateQRCode("ROOM:${room.id}")
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "QR de Salón: ${room.nombre}",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = EcoColors.AdminPrimary
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Escanea este código para evaluar el aula",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = EcoColors.TextMuted
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                qrBitmap?.let { bitmap ->
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "QR Code",
+                        modifier = Modifier.size(200.dp)
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Button(
+                        onClick = { onDownload(bitmap) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = EcoColors.AdminPrimary)
+                    ) {
+                        Icon(Icons.Default.Download, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Descargar QR")
+                    }
+                } ?: Box(modifier = Modifier.size(200.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = EcoColors.AdminPrimary)
+                }
+                
+                TextButton(onClick = onDismiss, modifier = Modifier.padding(top = 8.dp)) {
+                    Text("Cerrar")
+                }
+            }
+        }
     }
 }

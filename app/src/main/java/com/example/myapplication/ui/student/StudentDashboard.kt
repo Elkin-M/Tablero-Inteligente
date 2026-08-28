@@ -43,11 +43,13 @@ fun StudentDashboard(
     val ranking by viewModel.ranking.collectAsState(initial = emptyList())
     val user by viewModel.currentUser.collectAsState()
     val evaluations by viewModel.userEvaluations.collectAsState()
+    val rooms by viewModel.rooms.collectAsState()
 
     StudentDashboardContent(
         ranking = ranking,
         user = user,
         evaluations = evaluations,
+        rooms = rooms,
         onLogout = { 
             authViewModel.logout {
                 navController.navigate("login") {
@@ -64,9 +66,12 @@ fun StudentDashboardContent(
     ranking: List<Course>,
     user: com.example.myapplication.domain.model.User? = null,
     evaluations: List<Evaluation> = emptyList(),
+    rooms: List<com.example.myapplication.domain.model.Room> = emptyList(),
     onLogout: () -> Unit = {}
 ) {
     val userCourse = ranking.find { it.id == user?.courseId }
+    val userRoom = rooms.find { it.id == user?.courseId }
+    val displayName = userCourse?.nombre ?: userRoom?.nombre ?: "Sin Salón Asignado"
     val userRank = if (userCourse != null) ranking.indexOf(userCourse) + 1 else null
 
     Scaffold(
@@ -118,7 +123,7 @@ fun StudentDashboardContent(
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(
-                                text = if (userCourse != null) "Tu Salón: ${userCourse.nombre}" else "Sin Salón Asignado",
+                                text = "Tu Salón: $displayName",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = EcoColors.EstudiantePrimary
@@ -198,32 +203,101 @@ fun EvaluationItem(evaluation: Evaluation) {
     val dateString = dateFormat.format(Date(evaluation.fecha))
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            Icon(
-                Icons.Default.Assignment,
-                contentDescription = null,
-                tint = EcoColors.PrimaryGreen,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(dateString, style = MaterialTheme.typography.labelSmall, color = EcoColors.TextMuted)
-                Text("Puntaje: ${evaluation.puntajeObtenido}", fontWeight = FontWeight.Bold)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(EcoColors.EstudiantePrimary.copy(alpha = 0.1f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.Assignment,
+                            contentDescription = null,
+                            tint = EcoColors.EstudiantePrimary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = "Evaluación Semanal",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = EcoColors.TextDark
+                        )
+                        Text(
+                            text = dateString,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = EcoColors.TextMuted
+                        )
+                    }
+                }
+
+                Surface(
+                    color = EcoColors.EstudiantePrimary,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "${evaluation.puntajeObtenido} pts",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
             }
+
+            if (evaluation.indicadores.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                HorizontalDivider(color = EcoColors.Divider, thickness = 0.5.dp)
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    evaluation.indicadores.entries.take(3).forEach { (key, value) ->
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = key.replaceFirstChar { it.uppercase() },
+                                style = MaterialTheme.typography.labelSmall,
+                                color = EcoColors.TextMuted
+                            )
+                            Text(
+                                text = "$value/5",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold,
+                                color = EcoColors.EstudiantePrimary
+                            )
+                        }
+                    }
+                }
+            }
+
             if (evaluation.observaciones.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    evaluation.observaciones,
+                    text = evaluation.observaciones,
                     style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    modifier = Modifier.widthIn(max = 100.dp),
-                    color = EcoColors.TextMuted
+                    color = EcoColors.TextMuted,
+                    maxLines = 2,
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                 )
             }
         }
