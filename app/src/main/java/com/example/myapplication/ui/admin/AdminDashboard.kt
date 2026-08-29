@@ -29,6 +29,7 @@ import com.example.myapplication.ui.navigation.Screen
 import com.example.myapplication.util.QRGenerator
 import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.asImageBitmap
+import com.example.myapplication.ui.common.ProfileScreen
 
 @Composable
 fun AdminDashboard(
@@ -43,6 +44,7 @@ fun AdminDashboard(
         ranking = ranking,
         rooms = rooms,
         navController = navController,
+        authViewModel = authViewModel,
         onLogout = {
             authViewModel.logout {
                 navController.navigate(Screen.Login.route) {
@@ -59,6 +61,7 @@ fun AdminDashboardContent(
     ranking: List<Course>,
     rooms: List<Room>,
     navController: NavController,
+    authViewModel: AuthViewModel,
     onLogout: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(0) }
@@ -145,7 +148,7 @@ fun AdminDashboardContent(
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 },
                     label = { Text("Perfil") },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "Ajustes") },
+                    icon = { Icon(Icons.Default.Person, contentDescription = "Perfil") },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = EcoColors.AdminPrimary,
                         selectedTextColor = EcoColors.AdminPrimary,
@@ -163,7 +166,7 @@ fun AdminDashboardContent(
             when (selectedTab) {
                 0 -> TabInicio(ranking = ranking, totalSalones = rooms.size, navController = navController)
                 1 -> TabRankingCompleto(ranking = ranking)
-                2 -> ComingSoonScreen("Perfil y Ajustes")
+                2 -> ProfileScreen(authViewModel = authViewModel, onLogout = onLogout)
             }
         }
     }
@@ -319,6 +322,22 @@ fun ManagementGrid(navController: NavController) {
             )
             ManagementItem(
                 modifier = Modifier.weight(1f),
+                title = "Eventos",
+                icon = Icons.Default.CalendarMonth,
+                color = EcoColors.AdminPrimary,
+                onClick = { navController.navigate(Screen.EventManagement.route) }
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            ManagementItem(
+                modifier = Modifier.weight(1f),
+                title = "Tips",
+                icon = Icons.Default.Lightbulb,
+                color = EcoColors.AdminPrimary,
+                onClick = { navController.navigate(Screen.TipManagement.route) }
+            )
+            ManagementItem(
+                modifier = Modifier.weight(1f),
                 title = "Tablero IA",
                 icon = Icons.Default.Public,
                 color = EcoColors.AdminPrimary,
@@ -414,6 +433,7 @@ fun TabRankingCompleto(ranking: List<Course>) {
                 Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("#${index + 1}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = EcoColors.AdminPrimary, modifier = Modifier.width(40.dp))
                     Text(course.nombre, modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.width(16.dp))
                     Text("${course.puntosTotales} pts", fontWeight = FontWeight.Bold)
                 }
             }

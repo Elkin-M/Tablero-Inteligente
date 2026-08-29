@@ -20,6 +20,8 @@ sealed class Screen(val route: String) {
     object BadgeManagement : Screen("badge_management")
     object EvaluationManagement : Screen("evaluation_management")
     object EvidenceManagement : Screen("evidence_management")
+    object EventManagement : Screen("event_management")
+    object TipManagement : Screen("tip_management")
     object Reports : Screen("reports")
     object Settings : Screen("settings")
     object EnvironmentalDashboard : Screen("environmental_dashboard")

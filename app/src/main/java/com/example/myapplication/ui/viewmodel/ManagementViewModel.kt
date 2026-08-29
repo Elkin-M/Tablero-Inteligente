@@ -3,15 +3,7 @@ package com.example.myapplication.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.repository.EcoRepository
-import com.example.myapplication.domain.model.Badge
-import com.example.myapplication.domain.model.Campaign
-import com.example.myapplication.domain.model.Challenge
-import com.example.myapplication.domain.model.Course
-import com.example.myapplication.domain.model.Evaluation
-import com.example.myapplication.domain.model.Indicator
-import com.example.myapplication.domain.model.Room
-import com.example.myapplication.domain.model.User
-import com.example.myapplication.domain.model.UserRole
+import com.example.myapplication.domain.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -46,6 +38,12 @@ class ManagementViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val indicators: StateFlow<List<Indicator>> = repository.getIndicatorsFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val events: StateFlow<List<EcoEvent>> = repository.getEventsFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val tips: StateFlow<List<EcoTip>> = repository.getTipsFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun updateUserRole(uid: String, newRole: UserRole, courseId: String? = null) {
@@ -96,15 +94,33 @@ class ManagementViewModel @Inject constructor(
         }
     }
 
-    fun createIndicator(nombre: String, descripcion: String, categoria: String, valorMaximo: Int) {
+    fun createIndicator(nombre: String, descripcion: String, categoria: String, valorMaximo: Int, esContador: Boolean = false) {
         viewModelScope.launch {
-            repository.createIndicator(Indicator(nombre = nombre, descripcion = descripcion, categoria = categoria, valorMaximo = valorMaximo))
+            repository.createIndicator(Indicator(
+                nombre = nombre, 
+                descripcion = descripcion, 
+                categoria = categoria, 
+                valorMaximo = valorMaximo,
+                esContador = esContador
+            ))
         }
     }
 
     fun toggleIndicatorStatus(indicator: Indicator) {
         viewModelScope.launch {
             repository.updateIndicator(indicator.copy(activo = !indicator.activo))
+        }
+    }
+
+    fun createEvent(titulo: String, descripcion: String, fecha: Long) {
+        viewModelScope.launch {
+            repository.createEvent(EcoEvent(titulo = titulo, descripcion = descripcion, fecha = fecha))
+        }
+    }
+
+    fun createTip(contenido: String) {
+        viewModelScope.launch {
+            repository.createTip(EcoTip(contenido = contenido))
         }
     }
 }

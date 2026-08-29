@@ -19,12 +19,12 @@
       --color-primary: #2E7D32;       /* Verde Bosque */
       --color-primary-dark: #1B4332;  /* Verde Oscuro Profundo */
       --color-accent: #4CAF50;        /* Verde Hoja */
-      --color-surface-light: #F3E5F5; /* Morado Claro (para que combine mejor) */
+      --color-surface-light: #E8F5E9; /* Verde Menta Claro */
       --color-text-main: #1B4332;     /* Texto Principal */
       --color-text-muted: #52796F;    /* Texto Secundario */
-      --color-bg-page: #F3E5F5;       /* Fondo Admin Morado Claro */
+      --color-bg-page: #F4F9F5;       /* Fondo General */
       --color-card-bg: #FFFFFF;       /* Blanco Puro */
-      --color-border: #E1BEE7;        /* Borde Morado Suave */
+      --color-border: #D8EAD9;        /* Borde Suave */
       --color-live: #4CAF50;          /* Indicador En Vivo */
 
       --shadow-sm: 0 4px 12px rgba(27, 67, 50, 0.05);
@@ -42,6 +42,7 @@
 
     html, body {
       height: 100%;
+      overflow: hidden;
     }
 
     body {
@@ -51,7 +52,6 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
     }
 
     h2, h3 {
@@ -73,7 +73,6 @@
       box-shadow: var(--shadow-md);
       position: relative;
       z-index: 10;
-      gap: 1rem;
     }
 
     header .brand {
@@ -83,28 +82,17 @@
       font-family: var(--font-heading);
       font-size: 1.25rem;
       font-weight: 700;
-      min-width: 0;
     }
 
     header .brand img.logo {
       height: 40px;
       width: auto;
-      object-fit: contain;
-      flex-shrink: 0;
-    }
-
-    header .brand span.brand-text {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
     header .status {
       display: flex;
       align-items: center;
       gap: 0.85rem;
-      font-size: 0.85rem;
-      flex-shrink: 0;
     }
 
     #connStatus {
@@ -116,11 +104,6 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      transition: background 0.3s ease;
-    }
-
-    #connStatus.live {
-      background: rgba(255, 255, 255, 0.25);
     }
 
     #connStatus.live .live-dot {
@@ -133,8 +116,6 @@
       height: 8px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.5);
-      transition: all 0.3s ease;
-      flex-shrink: 0;
     }
 
     #clock {
@@ -142,32 +123,35 @@
       background: rgba(255, 255, 255, 0.15);
       padding: 0.35rem 0.75rem;
       border-radius: 999px;
-      font-variant-numeric: tabular-nums;
     }
 
-    /* ESTRUCTURA PRINCIPAL (DESKTOP) */
+    /* ESTRUCTURA PRINCIPAL */
     main {
       flex: 1;
       display: grid;
-      grid-template-columns: 240px 1fr;
-      gap: 1rem;
-      padding: 1rem 1.25rem;
-      overflow: hidden;
+      grid-template-columns: 300px 1fr;
+      gap: 1.25rem;
+      padding: 1.25rem;
       min-height: 0;
     }
 
     .sidebar {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
-      overflow: hidden;
+      min-height: 0;
+    }
+
+    .content-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
       min-height: 0;
     }
 
     .card {
       background: var(--color-card-bg);
-      border-radius: 20px;
-      padding: 1rem 1.15rem;
+      border-radius: 24px;
+      padding: 1.5rem;
       box-shadow: var(--shadow-sm);
       border: 1px solid var(--color-border);
       display: flex;
@@ -176,27 +160,25 @@
     }
 
     .card h3 {
-      font-size: 0.9rem;
-      margin-bottom: 0.75rem;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      flex-shrink: 0;
+      gap: 0.6rem;
       color: var(--color-primary-dark);
     }
 
     .card h3 i {
       color: var(--color-primary);
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
     }
 
-    /* RANKING DE SALONES */
+    /* RANKING */
     .ranking-container {
       flex: 1;
       overflow-y: auto;
-      padding-right: 0.25rem;
-      min-height: 0;
+      padding-right: 0.5rem;
     }
 
     .ranking-container::-webkit-scrollbar { width: 4px; }
@@ -206,345 +188,195 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.6rem 0.8rem;
-      border-radius: 12px;
-      margin-bottom: 0.4rem;
-      font-size: 0.8rem;
+      padding: 0.85rem 1.15rem;
+      border-radius: 16px;
+      margin-bottom: 0.6rem;
+      font-size: 0.95rem;
       font-weight: 600;
       background: var(--color-surface-light);
-      color: var(--color-primary-dark);
       transition: all 0.3s ease;
     }
 
     .ranking-item.active {
       background: var(--color-primary);
       color: #FFFFFF;
-      transform: translateX(4px);
-      box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+      transform: translateX(5px);
     }
 
-    .content-col {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      overflow: hidden;
+    /* FILA SUPERIOR: CARRUSEL Y EVENTOS */
+    .top-row {
+      flex: 1.6; /* Ocupa más espacio */
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 1.25rem;
       min-height: 0;
     }
 
-    /* CARRUSEL SALÓN DESTACADO */
     .carousel-section {
-      height: 42%;
       background: var(--color-card-bg);
-      border-radius: 20px;
-      padding: 1.1rem 1.25rem;
+      border-radius: 24px;
+      padding: 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 1.25rem;
       box-shadow: var(--shadow-sm);
       border: 1px solid var(--color-border);
-      min-height: 0;
     }
 
     .carousel-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-shrink: 0;
-      gap: 0.75rem;
     }
 
     #roomName {
-      font-size: 1.15rem;
+      font-size: 1.75rem;
       color: var(--color-primary);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
     .timer-bar {
-      width: 140px;
-      height: 6px;
-      background: var(--color-surface-light);
-      border-radius: 999px;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-
-    .timer-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--color-accent), var(--color-primary));
-      width: 0%;
-      border-radius: 999px;
-      transition: width 0.2s linear;
-    }
-
-    .carousel-grid {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 1.25rem;
-      flex: 1;
-      overflow: hidden;
-      min-height: 0;
-    }
-
-    .photo-box {
-      border-radius: 16px;
-      overflow: hidden;
-      background: var(--color-surface-light);
-      height: 100%;
-    }
-
-    .photo-box img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .room-info {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 0.6rem;
-      min-height: 0;
-    }
-
-    .info-pill {
-      background: var(--color-surface-light);
-      padding: 0.75rem 1rem;
-      border-radius: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.85rem;
-      color: var(--color-text-muted);
-      font-weight: 500;
-      gap: 0.5rem;
-    }
-
-    .info-pill b {
-      color: var(--color-primary-dark);
-      font-family: var(--font-heading);
-      font-size: 0.95rem;
-      flex-shrink: 0;
-    }
-
-    /* FILA MEDIA */
-    .middle-row {
-      height: 38%;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      min-height: 0;
-    }
-
-    .category-list {
-      flex: 1;
-      overflow-y: auto;
-      padding-right: 0.25rem;
-      min-height: 0;
-    }
-
-    .category-list::-webkit-scrollbar { width: 4px; }
-    .category-list::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 10px; }
-
-    .cat-item {
-      margin-bottom: 0.75rem;
-    }
-
-    .cat-top {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.78rem;
-      font-weight: 600;
-      margin-bottom: 0.35rem;
-      color: var(--color-text-main);
-      gap: 0.5rem;
-    }
-
-    .progress {
+      width: 200px;
       height: 8px;
       background: var(--color-surface-light);
       border-radius: 999px;
       overflow: hidden;
     }
 
-    .progress-bar {
+    .timer-fill {
       height: 100%;
-      background: var(--color-accent);
-      border-radius: 999px;
-      transition: width 0.6s ease;
+      background: var(--color-primary);
+      width: 0%;
+      transition: width 0.2s linear;
     }
 
-    .evidence-grid {
+    .carousel-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-      gap: 0.5rem;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 1.5rem;
       flex: 1;
       min-height: 0;
+      align-items: center;
     }
 
-    .evidence-img {
-      border-radius: 12px;
+    .photo-box {
+      border-radius: 24px;
       overflow: hidden;
       background: var(--color-surface-light);
+      aspect-ratio: 16 / 9; /* Mantiene la forma sin importar la imagen */
+      width: 100%;
+      position: relative;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
     }
 
-    .evidence-img img {
+    .photo-box img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: cover; /* Recorta la imagen para llenar el contenedor */
       display: block;
+      transition: transform 0.5s ease;
+    }
+
+    .room-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .info-pill {
+      background: var(--color-surface-light);
+      padding: 1.15rem;
+      border-radius: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.05rem;
+    }
+
+    .info-pill b {
+      color: var(--color-primary-dark);
+      font-size: 1.3rem;
+    }
+
+    /* EVENTOS */
+    .event-item {
+      padding: 1rem;
+      border-radius: 16px;
+      background: var(--color-surface-light);
+      margin-bottom: 0.75rem;
+    }
+
+    .event-item b {
+      color: var(--color-primary);
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .event-item span {
+      font-size: 0.9rem;
+      color: var(--color-text-main);
+      font-weight: 500;
     }
 
     /* FILA INFERIOR */
     .bottom-row {
-      height: 20%;
+      flex: 0.6;
       display: grid;
-      grid-template-columns: 1fr 1.2fr 1fr;
-      gap: 1rem;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 1.25rem;
       min-height: 0;
+    }
+
+    .tip-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: var(--color-text-muted);
+      font-weight: 500;
     }
 
     .stat-mini-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.6rem;
-      flex: 1;
-      min-height: 0;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
     }
 
     .stat-mini {
       background: var(--color-surface-light);
-      padding: 0.5rem;
-      border-radius: 12px;
+      padding: 1rem;
+      border-radius: 18px;
       text-align: center;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
     }
 
     .stat-mini span {
-      font-family: var(--font-heading);
-      font-size: 1.2rem;
-      font-weight: 700;
+      display: block;
+      font-size: 1.75rem;
+      font-weight: 800;
       color: var(--color-primary);
+      margin-bottom: 0.25rem;
     }
 
     .stat-mini b {
-      font-size: 0.65rem;
-      color: var(--color-text-muted);
+      font-size: 0.8rem;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-      font-weight: 600;
-    }
-
-    .tip-text {
-      font-size: 0.8rem;
       color: var(--color-text-muted);
-      line-height: 1.45;
-      font-weight: 500;
     }
 
-    .bottom-row p {
-      font-size: 0.8rem;
-      color: var(--color-text-main);
-      margin-bottom: 0.3rem;
-      font-weight: 500;
-    }
-
-    .bottom-row p b {
-      color: var(--color-primary);
-    }
-
-    /* ADAPTABILIDAD RESPONSIBA (PANTALLAS PEQUEÑAS / MÓVILES) */
-    @media (max-width: 900px) {
-      body {
-        overflow-y: auto;
-      }
-
-      main {
-        grid-template-columns: 1fr;
-        overflow: visible;
-        padding: 0.85rem;
-      }
-
-      .sidebar {
-        order: 2;
-      }
-
-      .sidebar .card {
-        max-height: 280px;
-      }
-
-      .content-col {
-        order: 1;
-        overflow: visible;
-      }
-
-      .carousel-section,
-      .middle-row,
-      .bottom-row {
-        height: auto;
-      }
-
-      .carousel-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .photo-box {
-        min-height: 180px;
-      }
-
-      .middle-row {
-        grid-template-columns: 1fr;
-      }
-
-      .bottom-row {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 600px) {
-      header {
-        padding: 0.6rem 1rem;
-        height: auto;
-        flex-wrap: wrap;
-      }
-
-      header .brand {
-        font-size: 1.05rem;
-      }
-
-      header .brand img.logo {
-        height: 32px;
-      }
-
-      .carousel-top {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .timer-bar {
-        width: 100%;
-      }
-
-      .evidence-grid {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(4, 1fr);
-        min-height: 200px;
-      }
+    /* RESPONSIVIDAD BÁSICA */
+    @media (max-width: 1100px) {
+      main { grid-template-columns: 1fr; overflow-y: auto; }
+      .sidebar { display: none; }
+      .top-row { grid-template-columns: 1fr; height: auto; }
+      .bottom-row { grid-template-columns: 1fr; height: auto; }
+      .carousel-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-<!-- NAVEGACIÓN -->
 <header>
   <div class="brand">
-    <img src="logo.png" alt="EcoLibertad Logo" class="logo">
+    <img src="logo.png" alt="Logo" class="logo">
     <span class="brand-text">Tablero Ambiental EcoLibertad</span>
   </div>
   <div class="status">
@@ -556,71 +388,62 @@
   </div>
 </header>
 
-<!-- CONTENIDO PRINCIPAL -->
 <main>
+  <!-- SIDEBAR: RANKING -->
   <aside class="sidebar">
     <div class="card" style="height: 100%;">
       <h3><i data-lucide="trophy"></i> Ranking Salones</h3>
       <div class="ranking-container" id="rankingList">
-        <p style="font-size: 0.75rem; color: var(--color-text-muted);">Cargando datos...</p>
+        <p>Cargando ranking...</p>
       </div>
     </div>
   </aside>
 
   <div class="content-col">
-    <!-- SECCIÓN SALÓN DESTACADO -->
-    <section class="carousel-section">
-      <div class="carousel-top">
-        <h2 id="roomName">Iniciando...</h2>
-        <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
-      </div>
-      <div class="carousel-grid">
-        <div class="photo-box">
-          <img id="roomImg" src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600" alt="Aula" />
+    <!-- FILA SUPERIOR: CARRUSEL Y CALENDARIO -->
+    <div class="top-row">
+      <section class="carousel-section">
+        <div class="carousel-top">
+          <h2 id="roomName">Cargando...</h2>
+          <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
         </div>
-        <div class="room-info" id="roomStats">
-          <div class="info-pill"><span>Puntaje Acumulado</span><b id="rPts">-</b></div>
-          <div class="info-pill"><span>Evaluaciones</span><b id="rEvs">-</b></div>
-          <div class="info-pill"><span>Última Revisión</span><b id="rDate">-</b></div>
+        <div class="carousel-grid">
+          <div class="photo-box">
+            <img id="roomImg" src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800" alt="Aula" />
+          </div>
+          <div class="room-info">
+            <div class="info-pill"><span>Puntaje</span><b id="rPts">0</b></div>
+            <div class="info-pill"><span>Revisiones</span><b id="rEvs">0</b></div>
+            <div class="info-pill"><span>Última</span><b id="rDate">-</b></div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- FILA MEDIA -->
-    <div class="middle-row">
       <div class="card">
-        <h3><i data-lucide="bar-chart-2"></i> Impacto por Categoría</h3>
-        <div class="category-list" id="catList"></div>
-      </div>
-      <div class="card">
-        <h3><i data-lucide="camera"></i> Evidencias Recientes</h3>
-        <div class="evidence-grid" id="evGrid"></div>
+        <h3><i data-lucide="calendar"></i> Calendario Ambiental</h3>
+        <div id="eventList" class="ranking-container">
+          <p>Cargando eventos...</p>
+        </div>
       </div>
     </div>
 
-    <!-- FILA INFERIOR -->
+    <!-- FILA INFERIOR: TIP Y CONTADORES -->
     <div class="bottom-row">
       <div class="card">
-        <h3><i data-lucide="lightbulb"></i> Tip del Día</h3>
-        <p class="tip-text" id="tipText">Cierra el grifo mientras te enjabonas las manos. ¡Cada gota cuenta!</p>
+        <h3><i data-lucide="lightbulb"></i> Tip Ambiental</h3>
+        <p class="tip-text" id="tipText">¡Pequeñas acciones logran grandes cambios!</p>
       </div>
       <div class="card">
-        <h3><i data-lucide="globe"></i> Métricas Globales</h3>
-        <div class="stat-mini-grid">
-          <div class="stat-mini"><span id="gPts">0</span><b>Puntos</b></div>
-          <div class="stat-mini"><span id="gEvs">0</span><b>Revisiones</b></div>
+        <h3><i data-lucide="leaf"></i> Impacto Institucional</h3>
+        <div class="stat-mini-grid" id="gCountersGrid">
+          <div class="stat-mini"><span>0</span><b>Botellas</b></div>
+          <div class="stat-mini"><span>0</span><b>Tapas</b></div>
         </div>
-      </div>
-      <div class="card">
-        <h3><i data-lucide="calendar"></i> Próximos Eventos</h3>
-        <p>📅 <b>Oct 21:</b> Día del Árbol</p>
-        <p>📅 <b>Nov 05:</b> Feria de Reciclaje</p>
       </div>
     </div>
   </div>
 </main>
 
-<!-- LÓGICA DE FIREBASE Y FUNCIONALIDAD EN TIEMPO REAL -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
   import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
@@ -639,87 +462,46 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  let rawRooms = [];
-  let rawEvs = [];
-  let combinedData = [];
-  let currentIndex = 0;
-  let elapsed = 0;
+  let rawRooms = [], rawEvs = [], rawIndicators = [], rawEvents = [], rawTips = [];
+  let combinedData = [], currentIndex = 0, elapsed = 0;
   const DURATION = 8000;
 
-  const tips = [
-    "Cierra el grifo mientras te enjabonas las manos. ¡Cada gota cuenta!",
-    "Usa ambas caras del papel antes de reciclarlo.",
-    "Apaga las luces al salir de un salón vacío.",
-    "Trae tu propio termo para evitar botellas de plástico.",
-    "Separa tus residuos: orgánicos, plásticos y papel."
-  ];
+  function formatDriveUrl(url) {
+    if (!url) return url;
+    const match = url.match(/\/file\/d\/([^\/]+)\//) || url.match(/id=([^&]+)/);
+    return match ? `https://lh3.googleusercontent.com/d/${match[1]}` : url;
+  }
 
   function processData() {
-    const roomPoints = {};
-    const roomCount = {};
-    const roomPhotos = {};
-    const roomDates = {};
-    const globalCats = {};
-    let globalPoints = 0;
+    const roomPts = {}, roomCount = {}, roomPhotos = {}, roomDates = {}, counters = {};
 
     rawEvs.forEach(e => {
-      const p = e.puntajeObtenido || 0;
       const rid = e.roomId;
-      if (p > 0) { // Solo sumar si ya fue calificada
-          globalPoints += p;
-          roomPoints[rid] = (roomPoints[rid] || 0) + p;
-      }
+      roomPts[rid] = (roomPts[rid] || 0) + (e.puntajeObtenido || 0);
       roomCount[rid] = (roomCount[rid] || 0) + 1;
-
       if (e.evidenciasUrls?.length) {
         if (!roomPhotos[rid]) roomPhotos[rid] = [];
         roomPhotos[rid].push(...e.evidenciasUrls);
       }
-
-      if (!roomDates[rid] || e.fecha > roomDates[rid]) {
-        roomDates[rid] = e.fecha;
-      }
+      if (!roomDates[rid] || e.fecha > roomDates[rid]) roomDates[rid] = e.fecha;
 
       Object.entries(e.indicadores || {}).forEach(([k, v]) => {
-        globalCats[k] = (globalCats[k] || 0) + v;
+        counters[k] = (counters[k] || 0) + v;
       });
     });
 
     combinedData = rawRooms.map(r => ({
       ...r,
-      pts: roomPoints[r.id] || 0,
+      pts: roomPts[r.id] || 0,
       count: roomCount[r.id] || 0,
       photos: roomPhotos[r.id] || [],
       lastDate: roomDates[r.id] ? new Date(roomDates[r.id]).toLocaleDateString() : 'Sin datos'
     })).sort((a, b) => b.pts - a.pts);
 
-    renderGlobal(globalPoints, rawEvs.length, globalCats);
-    renderEvidenceGrid();
+    renderRanking();
+    renderCounters(counters);
+    renderEvents();
     updateCarousel();
-  }
-
-  function renderGlobal(pts, totalEvs, cats) {
-    document.getElementById('gPts').textContent = pts.toLocaleString();
-    document.getElementById('gEvs').textContent = totalEvs;
-
-    const catList = document.getElementById('catList');
-    const sortedCats = Object.entries(cats).sort((a,b) => b[1] - a[1]);
-    const max = Math.max(...Object.values(cats), 1);
-
-    catList.innerHTML = sortedCats.map(([name, val]) => `
-      <div class="cat-item">
-        <div class="cat-top"><span>${name}</span><span>${val} pts</span></div>
-        <div class="progress"><div class="progress-bar" style="width: ${(val/max)*100}%"></div></div>
-      </div>
-    `).join('');
-  }
-
-  function renderEvidenceGrid() {
-    const allPhotos = rawEvs.flatMap(e => e.evidenciasUrls || []).slice(0, 8);
-    const grid = document.getElementById('evGrid');
-    grid.innerHTML = allPhotos.map(url => `
-      <div class="evidence-img"><img src="${url}" loading="lazy" /></div>
-    `).join('');
   }
 
   function renderRanking() {
@@ -732,9 +514,28 @@
     `).join('');
   }
 
-  function updateCarousel() {
-    if (combinedData.length === 0) return;
+  function renderCounters(counters) {
+    const grid = document.getElementById('gCountersGrid');
+    const indicatorNames = rawIndicators.filter(i => i.esContador).map(i => i.nombre);
+    const items = Object.entries(counters).filter(([n]) => indicatorNames.includes(n));
 
+    grid.innerHTML = items.length ? items.map(([n, v]) => `
+      <div class="stat-mini"><span>${v.toLocaleString()}</span><b>${n}</b></div>
+    `).join('') : '<p>Esperando datos...</p>';
+  }
+
+  function renderEvents() {
+    const list = document.getElementById('eventList');
+    list.innerHTML = rawEvents.length ? rawEvents.slice(0, 5).map(ev => `
+      <div class="event-item">
+        <b>${new Date(ev.fecha).toLocaleDateString('es-ES', {day:'numeric', month:'short'})}</b>
+        <span>${ev.titulo}</span>
+      </div>
+    `).join('') : '<p>No hay eventos próximos.</p>';
+  }
+
+  function updateCarousel() {
+    if (!combinedData.length) return;
     const cur = combinedData[currentIndex % combinedData.length];
     document.getElementById('roomName').textContent = cur.nombre;
     document.getElementById('rPts').textContent = cur.pts;
@@ -742,45 +543,35 @@
     document.getElementById('rDate').textContent = cur.lastDate;
 
     const img = document.getElementById('roomImg');
-    if (cur.photos.length > 0) {
-      img.src = cur.photos[Math.floor(Math.random() * cur.photos.length)];
-    } else {
-      img.src = "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600";
-    }
+    img.src = cur.photos.length ? formatDriveUrl(cur.photos[Math.floor(Math.random() * cur.photos.length)])
+                               : "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800";
 
+    if (rawTips.length) {
+      document.getElementById('tipText').textContent = rawTips[Math.floor(Math.random() * rawTips.length)].mensaje;
+    }
     renderRanking();
-    document.getElementById('tipText').textContent = tips[Math.floor(Math.random() * tips.length)];
   }
 
   onAuthStateChanged(auth, user => {
     if (user) {
-      const conn = document.getElementById('connStatus');
-      conn.classList.add('live');
+      document.getElementById('connStatus').classList.add('live');
       document.getElementById('connLabel').textContent = 'En vivo';
 
-      onSnapshot(collection(db, 'rooms'), snap => {
-        rawRooms = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        if (rawEvs.length) processData();
-      });
-
-      onSnapshot(collection(db, 'evaluations'), snap => {
-        rawEvs = snap.docs.map(d => d.data());
-        if (rawRooms.length) processData();
-      });
+      onSnapshot(collection(db, 'rooms'), s => { rawRooms = s.docs.map(d => ({id:d.id, ...d.data()})); processData(); });
+      onSnapshot(collection(db, 'indicators'), s => { rawIndicators = s.docs.map(d => d.data()); processData(); });
+      onSnapshot(collection(db, 'evaluations'), s => { rawEvs = s.docs.map(d => d.data()); processData(); });
+      onSnapshot(collection(db, 'events'), s => { rawEvents = s.docs.map(d => d.data()).filter(e => e.activa !== false).sort((a,b)=>a.fecha-b.fecha); renderEvents(); });
+      onSnapshot(collection(db, 'tips'), s => { rawTips = s.docs.map(d => d.data()).filter(t => t.activa !== false); });
     }
   });
 
   signInAnonymously(auth);
 
   setInterval(() => {
-    if (combinedData.length > 0) {
+    if (combinedData.length) {
       elapsed += 200;
       document.getElementById('timerFill').style.width = (elapsed / DURATION) * 100 + '%';
-      if (elapsed >= DURATION) {
-        elapsed = 0;
-        currentIndex++;
-        updateCarousel();
-      }
+      if (elapsed >= DURATION) { elapsed = 0; currentIndex++; updateCarousel(); }
     }
   }, 200);
 
@@ -788,7 +579,6 @@
     document.getElementById('clock').textContent = new Date().toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
   }, 1000);
 
-  // Inicializar iconos de Lucide
   lucide.createIcons();
 </script>
 </body>

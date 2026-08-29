@@ -197,7 +197,8 @@ class EcoRepository @Inject constructor(
                             descripcion = doc.getString("descripcion") ?: "",
                             categoria = doc.getString("categoria") ?: "",
                             valorMaximo = (doc.getLong("valorMaximo") ?: 5L).toInt(),
-                            activo = doc.getBoolean("activo") ?: true
+                            activo = doc.getBoolean("activo") ?: true,
+                            esContador = doc.getBoolean("esContador") ?: false
                         )
                     } catch (e: Exception) { null }
                 } ?: emptyList()
@@ -206,9 +207,31 @@ class EcoRepository @Inject constructor(
         awaitClose { listener.remove() }
     }
 
+    fun getEventsFlow(): Flow<List<EcoEvent>> = callbackFlow {
+        val listener = firestore.collection("events")
+            .whereEqualTo("activa", true)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) return@addSnapshotListener
+                val events = snapshot?.toObjects(EcoEvent::class.java) ?: emptyList()
+                trySend(events.sortedBy { it.fecha })
+            }
+        awaitClose { listener.remove() }
+    }
+
+    fun getTipsFlow(): Flow<List<EcoTip>> = callbackFlow {
+        val listener = firestore.collection("tips")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) return@addSnapshotListener
+                val tips = snapshot?.toObjects(EcoTip::class.java) ?: emptyList()
+                val filteredAndSorted = tips.filter { it.activa }
+                    .sortedByDescending { it.fecha }
+                trySend(filteredAndSorted)
+            }
+        awaitClose { listener.remove() }
+    }
+
     fun getEvaluationsFlow(): Flow<List<Evaluation>> = callbackFlow {
         val listener = firestore.collection("evaluations")
-            .orderBy("fecha", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     trySend(emptyList())
@@ -226,11 +249,41 @@ class EcoRepository @Inject constructor(
                             evidenciasUrls = (doc.get("evidenciasUrls") as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
                             indicadores = (doc.get("indicadores") as? Map<*, *>)?.entries?.associate {
                                 it.key.toString() to ((it.value as? Long)?.toInt() ?: 0)
-                            } ?: emptyMap()
+                            } ?: emptyMap(),
+                            observaciones = doc.getString("observaciones") ?: ""
                         )
                     } catch (e: Exception) { null }
                 } ?: emptyList()
-                trySend(evaluations)
+                
+                // Ordenamos localmente para evitar requerir un índice en Firestore
+                val sortedEvaluations = evaluations.sortedByDescending { it.fecha }
+                trySend(sortedEvaluations)
+            }
+        awaitClose { listener.remove() }
+    }
+
+    fun getBaselinesFlow(): Flow<List<BaselineDiagnostic>> = callbackFlow {
+        val listener = firestore.collection("baseline_diagnostics")
+            .orderBy("fecha", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
+                val baselines = snapshot?.documents?.mapNotNull { doc ->
+                    try {
+                        BaselineDiagnostic(
+                            roomId = doc.getString("roomId") ?: "",
+                            estadoLimpieza = (doc.getLong("estadoLimpieza") ?: 0L).toInt(),
+                            clasificacionResiduos = (doc.getLong("clasificacionResiduos") ?: 0L).toInt(),
+                            ahorroEnergia = (doc.getLong("ahorroEnergia") ?: 0L).toInt(),
+                            cuidadoMobiliario = (doc.getLong("cuidadoMobiliario") ?: 0L).toInt(),
+                            participacionAmbiental = (doc.getLong("participacionAmbiental") ?: 0L).toInt(),
+                            fecha = doc.getLong("fecha") ?: 0L
+                        )
+                    } catch (e: Exception) { null }
+                } ?: emptyList()
+                trySend(baselines)
             }
         awaitClose { listener.remove() }
     }
@@ -405,6 +458,13 @@ class EcoRepository @Inject constructor(
         Result.failure(e)
     }
 
+    suspend fun deleteIndicator(indicatorId: String): Result<Unit> = try {
+        firestore.collection("indicators").document(indicatorId).delete().await()
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
     suspend fun updateEvaluationScore(evaluationId: String, score: Int): Result<Unit> = try {
         firestore.runTransaction { transaction ->
             val evalRef = firestore.collection("evaluations").document(evaluationId)
@@ -428,6 +488,39 @@ class EcoRepository @Inject constructor(
                 }
             }
         }.await()
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    suspend fun createEvent(event: EcoEvent): Result<Unit> = try {
+        val doc = firestore.collection("events").document()
+        firestore.collection("events").document(doc.id).set(event.copy(id = doc.id)).await()
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    suspend fun createTip(tip: EcoTip): Result<Unit> = try {
+        // Obtenemos todos los tips para filtrar y ordenar localmente, evitando la necesidad de índices compuestos
+        val tipsSnapshot = firestore.collection("tips")
+            .get()
+            .await()
+
+        val activeTips = tipsSnapshot.documents.mapNotNull { doc ->
+            try {
+                val t = doc.toObject(EcoTip::class.java)
+                t?.copy(id = doc.id)
+            } catch (e: Exception) { null }
+        }.filter { it.activa }.sortedBy { it.fecha }
+
+        if (activeTips.size >= 3) {
+            val oldestTip = activeTips.first()
+            firestore.collection("tips").document(oldestTip.id).delete().await()
+        }
+
+        val doc = firestore.collection("tips").document()
+        firestore.collection("tips").document(doc.id).set(tip.copy(id = doc.id, fecha = System.currentTimeMillis())).await()
         Result.success(Unit)
     } catch (e: Exception) {
         Result.failure(e)

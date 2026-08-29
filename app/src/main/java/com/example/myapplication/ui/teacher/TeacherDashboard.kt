@@ -21,6 +21,7 @@ import androidx.navigation.NavController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.domain.model.Evaluation
+import com.example.myapplication.ui.common.EvaluationDetailDialog
 import com.example.myapplication.ui.common.QRScanner
 import com.example.myapplication.ui.navigation.Screen
 import com.example.myapplication.ui.theme.EcoColors
@@ -49,6 +50,8 @@ fun TeacherDashboard(
     TeacherDashboardContent(
         recentEvaluations = recentEvaluations,
         onScanClick = { showScanner = true },
+        onManageTips = { navController.navigate(Screen.TipManagement.route) },
+        onManageEvents = { navController.navigate(Screen.EventManagement.route) },
         onLogout = {
             authViewModel.logout {
                 navController.navigate(Screen.Login.route) {
@@ -65,6 +68,8 @@ fun TeacherDashboard(
 fun TeacherDashboardContent(
     recentEvaluations: List<Evaluation>,
     onScanClick: () -> Unit,
+    onManageTips: () -> Unit,
+    onManageEvents: () -> Unit,
     onLogout: () -> Unit,
     viewModel: EvaluationViewModel
 ) {
@@ -88,7 +93,7 @@ fun TeacherDashboardContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "Panel Docente",
+                        "Comité Ambiental",
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.titleLarge,
                         color = Color.White,
@@ -121,30 +126,53 @@ fun TeacherDashboardContent(
             ) {
                 Column(modifier = Modifier.padding(24.dp)) {
                     Text(
-                        "¡Bienvenido, Docente!",
+                        "¡Bienvenido, Comité!",
                         style = MaterialTheme.typography.headlineSmall,
                         color = EcoColors.DocentePrimary,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        "Inicia una nueva evaluación ambiental hoy.",
+                        "Gestiona el impacto ambiental de tu institución.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = EcoColors.TextDark
                     )
                     
                     Spacer(modifier = Modifier.height(24.dp))
                     
-                    Button(
-                        onClick = onScanClick,
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = EcoColors.DocentePrimary,
-                            contentColor = Color.White
-                        )
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Icon(Icons.Default.QrCodeScanner, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Escanear QR del Salón")
+                        Button(
+                            onClick = onScanClick,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = EcoColors.DocentePrimary),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.QrCodeScanner, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Evaluar QR", style = MaterialTheme.typography.bodyMedium)
+                        }
+                        
+                        OutlinedButton(
+                            onClick = onManageTips,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.Lightbulb, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Gestionar Tips", style = MaterialTheme.typography.bodyMedium)
+                        }
+
+                        OutlinedButton(
+                            onClick = onManageEvents,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.Event, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Gestionar Eventos", style = MaterialTheme.typography.bodyMedium)
+                        }
                     }
                 }
             }
@@ -169,6 +197,8 @@ fun TeacherDashboardContent(
             ) {
                 items(recentEvaluations) { evaluation ->
                     val roomName = rooms.find { it.id == evaluation.roomId }?.nombre ?: evaluation.roomId
+                    var showDetail by remember { mutableStateOf(false) }
+                    
                     ListItem(
                         headlineContent = { Text("Salón $roomName", fontWeight = FontWeight.Bold, color = EcoColors.TextDark) },
                         supportingContent = { 
@@ -177,10 +207,18 @@ fun TeacherDashboardContent(
                             Text("Puntaje: ${evaluation.puntajeObtenido} pts - $date", color = EcoColors.TextMuted) 
                         },
                         leadingContent = { Icon(Icons.Default.History, contentDescription = null, tint = EcoColors.DocentePrimary) },
-                        trailingContent = { Text("Ver", color = EcoColors.DocentePrimary, fontWeight = FontWeight.Bold) },
+                        trailingContent = { 
+                            TextButton(onClick = { showDetail = true }) {
+                                Text("Ver", color = EcoColors.DocentePrimary, fontWeight = FontWeight.Bold)
+                            }
+                        },
                         colors = ListItemDefaults.colors(containerColor = Color.White),
                         modifier = Modifier.padding(horizontal = 4.dp)
                     )
+
+                    if (showDetail) {
+                        EvaluationDetailDialog(evaluation = evaluation, roomName = roomName, onDismiss = { showDetail = false })
+                    }
                 }
             }
         }
@@ -289,12 +327,9 @@ fun StudentAssignmentDialog(
     )
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun TeacherDashboardPreview() {
-    // Para el preview necesitamos un viewModel mock o no usarlo en el preview
-    // Por simplicidad, ajustamos el preview para que compile
     MyApplicationTheme {
         Box(modifier = Modifier.fillMaxSize()) {
             Text("Teacher Dashboard Preview (Requires ViewModel)")

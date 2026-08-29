@@ -26,7 +26,7 @@ private data class RoleOption(
 
 private val roleOptions = listOf(
     RoleOption(UserRole.ADMIN, "Administrador", Icons.Default.AdminPanelSettings),
-    RoleOption(UserRole.DOCENTE, "Docente", Icons.Default.School),
+    RoleOption(UserRole.COMITE_AMBIENTAL, "Comité Ambiental", Icons.Default.Eco),
     RoleOption(UserRole.ESTUDIANTE, "Estudiante", Icons.Default.Face),
     RoleOption(UserRole.INVITADO, "Invitado", Icons.Default.PersonOutline)
 )
@@ -75,22 +75,26 @@ fun RoleSelectionScreenContent(
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Row(
+                        Column(
                             modifier = Modifier
-                                .padding(16.dp)
+                                .padding(24.dp)
                                 .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             val roleColor = EcoColors.getPrimaryColor(option.role)
-                            Icon(option.icon, contentDescription = null, tint = roleColor)
-                            Text(option.label, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = roleColor)
-                            Spacer(modifier = Modifier.weight(1f))
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                imageVector = option.icon,
                                 contentDescription = null,
-                                tint = roleColor.copy(alpha = 0.5f),
-                                modifier = Modifier.size(16.dp)
+                                tint = roleColor,
+                                modifier = Modifier.size(40.dp)
+                            )
+                            Text(
+                                text = option.label,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = roleColor,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
                             )
                         }
                     }

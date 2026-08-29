@@ -7,6 +7,7 @@ import com.example.myapplication.domain.model.BaselineDiagnostic
 import com.example.myapplication.domain.model.Course
 import com.example.myapplication.domain.model.Room
 import com.example.myapplication.domain.model.Evaluation
+import com.example.myapplication.domain.model.EcoTip
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -56,6 +57,9 @@ class RankingViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val rooms: StateFlow<List<Room>> = repository.getRoomsFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val tips: StateFlow<List<EcoTip>> = repository.getTipsFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _formState = MutableStateFlow<RoomFormState>(RoomFormState.Idle)

@@ -164,7 +164,7 @@ class EvaluationRepositoryImpl @Inject constructor(
                 puntajeObtenido = (data["puntajeObtenido"] as? Long)?.toInt() ?: 0,
                 evidenciasUrls = (data["evidenciasUrls"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
                 indicadores = (data["indicadores"] as? Map<*, *>)?.entries?.associate { 
-                    it.key.toString() to (it.value as? Long)?.toInt()!!
+                    it.key.toString() to ((it.value as? Long)?.toInt() ?: 0)
                 } ?: emptyMap(),
                 observaciones = data["observaciones"] as? String ?: ""
             )

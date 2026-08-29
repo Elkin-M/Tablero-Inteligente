@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import kotlinx.coroutines.launch
 import com.example.myapplication.domain.model.BaselineDiagnostic
 import com.example.myapplication.domain.model.Evaluation
 import com.example.myapplication.domain.model.Indicator
@@ -46,7 +47,15 @@ fun EvaluationForm(
         rooms.find { it.id == roomId }?.nombre ?: roomId
     }
 
-    val indicatorScores = remember { mutableStateMapOf<String, Int>() }
+    val indicatorCounts = remember { mutableStateMapOf<String, String>() }
+    
+    // Inicializar contadores si están vacíos para permitir 0 por defecto
+    LaunchedEffect(indicators) {
+        val bId = indicators.find { it.nombre.equals("Botellas", ignoreCase = true) }?.id ?: "botellas"
+        val tId = indicators.find { it.nombre.equals("Tapas", ignoreCase = true) }?.id ?: "tapas"
+        if (indicatorCounts[bId] == null) indicatorCounts[bId] = "0"
+        if (indicatorCounts[tId] == null) indicatorCounts[tId] = "0"
+    }
     
     // Sliders de diagnóstico inicial (0-10)
     var limpieza by remember { mutableFloatStateOf(0f) }
@@ -82,15 +91,31 @@ fun EvaluationForm(
         }
     }
 
-    val onSave = {
-        if (indicatorScores.isEmpty() && indicators.any { it.activo }) {
-            // Podríamos mostrar un error, pero mejor inicializamos con valores por defecto
-        }
+    val onSave: () -> Unit = {
+        val bottlesIndicator = indicators.find { it.nombre.equals("Botellas", ignoreCase = true) }
+        val tapasIndicator = indicators.find { it.nombre.equals("Tapas", ignoreCase = true) }
         
-        val finalScores = indicators.filter { it.activo }.associate { 
-            it.nombre to (indicatorScores[it.id] ?: 0)
-        }
-        val totalPoints = finalScores.values.sum()
+        val bottlesVal = indicatorCounts[bottlesIndicator?.id ?: "botellas"] ?: "0"
+        val tapasVal = indicatorCounts[tapasIndicator?.id ?: "tapas"] ?: "0"
+        
+        val diagnostic = BaselineDiagnostic(
+            roomId = roomId,
+            estadoLimpieza = limpieza.toInt(),
+            clasificacionResiduos = residuos.toInt(),
+            ahorroEnergia = energia.toInt(),
+            cuidadoMobiliario = mobiliario.toInt(),
+            participacionAmbiental = participacion.toInt()
+        )
+
+        // Preparamos los indicadores para guardar, convirtiendo a Int (permite 0)
+        val finalScores = mutableMapOf<String, Int>()
+        
+        // Botellas y Tapas son obligatorios
+        finalScores["Botellas"] = bottlesVal.toIntOrNull() ?: 0
+        finalScores["Tapas"] = tapasVal.toIntOrNull() ?: 0
+        
+        // El puntaje es automático: promedio de los 5 indicadores de diagnóstico * 10
+        val totalPoints = (diagnostic.promedioInicial * 10).toInt()
         
         val evaluation = Evaluation(
             roomId = roomId,
@@ -99,15 +124,6 @@ fun EvaluationForm(
             indicadores = finalScores,
             observaciones = observaciones,
             fecha = System.currentTimeMillis()
-        )
-
-        val diagnostic = BaselineDiagnostic(
-            roomId = roomId,
-            estadoLimpieza = limpieza.toInt(),
-            clasificacionResiduos = residuos.toInt(),
-            ahorroEnergia = energia.toInt(),
-            cuidadoMobiliario = mobiliario.toInt(),
-            participacionAmbiental = participacion.toInt()
         )
 
         viewModel.submitEvaluationWithDiagnostic(evaluation, diagnostic, selectedImages.map { it.toString() })
@@ -191,15 +207,18 @@ fun EvaluationForm(
             }
 
             Text(
-                "Indicadores de Desempeño",
+                "Indicadores Ambientales (Obligatorio)",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.ExtraBold,
                 color = EcoColors.TextDark
             )
 
-            // Renderizado dinámico de indicadores
-            indicators.filter { it.activo }.forEach { indicator ->
-                val currentScore = indicatorScores[indicator.id] ?: 0
+            // Renderizado manual de Botellas y Tapas para asegurar que siempre aparezcan
+            val indicatorsToShow = listOf("Botellas", "Tapas")
+            
+            indicatorsToShow.forEach { indicatorName ->
+                val indicatorId = indicators.find { it.nombre.equals(indicatorName, ignoreCase = true) }?.id ?: indicatorName.lowercase()
+                val currentCount = indicatorCounts[indicatorId] ?: "0"
                 
                 Card(
                     colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -208,52 +227,22 @@ fun EvaluationForm(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
+                        Text(
+                            indicatorName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = EcoColors.DocentePrimary
+                        )
+                        OutlinedTextField(
+                            value = currentCount,
+                            onValueChange = { if (it.isEmpty() || it.all { char -> char.isDigit() }) indicatorCounts[indicatorId] = it },
+                            label = { Text("Cantidad en Kilos (Kg)") },
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                indicator.nombre,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = EcoColors.DocentePrimary,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Surface(
-                                color = if (currentScore > 0) EcoColors.DocentePrimary else Color.LightGray,
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Text(
-                                    "${currentScore}/${indicator.valorMaximo}",
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                        
-                        if (indicator.descripcion.isNotEmpty()) {
-                            Text(
-                                indicator.descripcion,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = EcoColors.TextMuted,
-                                modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
-                            )
-                        }
-                        
-                        Slider(
-                            value = currentScore.toFloat(),
-                            onValueChange = { indicatorScores[indicator.id] = it.toInt() },
-                            valueRange = 0f..indicator.valorMaximo.toFloat(),
-                            steps = if (indicator.valorMaximo > 1) indicator.valorMaximo - 1 else 0,
-                            enabled = !isLoading,
-                            colors = SliderDefaults.colors(
-                                thumbColor = EcoColors.DocentePrimary,
-                                activeTrackColor = EcoColors.DocentePrimary,
-                                inactiveTrackColor = EcoColors.DocentePrimary.copy(alpha = 0.1f)
-                            )
+                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                                keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            suffix = { Text("Kg") }
                         )
                     }
                 }

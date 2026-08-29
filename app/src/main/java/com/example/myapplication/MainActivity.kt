@@ -4,7 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -15,11 +21,13 @@ import com.example.myapplication.ui.admin.CampaignManagementScreen
 import com.example.myapplication.ui.admin.ChallengeManagementScreen
 import com.example.myapplication.ui.admin.CourseManagementScreen
 import com.example.myapplication.ui.admin.EvaluationManagementScreen
+import com.example.myapplication.ui.admin.EventManagementScreen
 import com.example.myapplication.ui.admin.EvidenceManagementScreen
 import com.example.myapplication.ui.admin.IndicatorManagementScreen
 import com.example.myapplication.ui.admin.ReportsScreen
 import com.example.myapplication.ui.admin.RoomManagementScreen
 import com.example.myapplication.ui.admin.SettingsScreen
+import com.example.myapplication.ui.admin.TipManagementScreen
 import com.example.myapplication.ui.admin.UserManagementScreen
 import com.example.myapplication.ui.auth.InvitadoDashboard
 import com.example.myapplication.ui.auth.LoginScreen
@@ -28,11 +36,14 @@ import com.example.myapplication.ui.auth.RegisterScreen
 import com.example.myapplication.ui.auth.RoleSelectionScreen
 import com.example.myapplication.ui.auth.SplashScreen
 import com.example.myapplication.ui.common.ComingSoonScreen
+import com.example.myapplication.ui.common.GlobalAlertOverlay
 import com.example.myapplication.ui.navigation.Screen
 import com.example.myapplication.ui.student.StudentDashboard
 import com.example.myapplication.ui.teacher.EvaluationForm
 import com.example.myapplication.ui.teacher.TeacherDashboard
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import com.example.myapplication.ui.viewmodel.AuthViewModel
+import com.example.myapplication.ui.viewmodel.GlobalNotificationViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -40,9 +51,20 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        
         setContent {
             MyApplicationTheme {
-                EcoLibertadNavigation()
+                val globalNotificationViewModel: GlobalNotificationViewModel = viewModel()
+                val authViewModel: AuthViewModel = viewModel()
+                val user by authViewModel.user.collectAsState()
+                
+                Box(modifier = Modifier.fillMaxSize()) {
+                    EcoLibertadNavigation()
+                    GlobalAlertOverlay(
+                        viewModel = globalNotificationViewModel,
+                        role = user?.rol
+                    )
+                }
             }
         }
     }
@@ -55,9 +77,10 @@ fun EcoLibertadNavigation() {
     fun navigateByRole(role: UserRole) {
         val route = when (role) {
             UserRole.ADMIN -> Screen.AdminDashboard.route
-            UserRole.DOCENTE -> Screen.TeacherDashboard.route
+            UserRole.COMITE_AMBIENTAL, UserRole.DOCENTE -> Screen.TeacherDashboard.route
             UserRole.ESTUDIANTE -> Screen.StudentDashboard.route
             UserRole.INVITADO -> Screen.InvitadoDashboard.route
+            else -> Screen.InvitadoDashboard.route
         }
         navController.navigate(route) {
             popUpTo(Screen.Login.route) { inclusive = true }
@@ -112,6 +135,8 @@ fun EcoLibertadNavigation() {
         composable(Screen.BadgeManagement.route) { BadgeManagementScreen(navController) }
         composable(Screen.EvaluationManagement.route) { EvaluationManagementScreen(navController) }
         composable(Screen.EvidenceManagement.route) { EvidenceManagementScreen(onBack = { navController.popBackStack() }) }
+        composable(Screen.EventManagement.route) { EventManagementScreen(navController) }
+        composable(Screen.TipManagement.route) { TipManagementScreen(navController) }
         composable(Screen.Reports.route) { ReportsScreen(onBack = { navController.popBackStack() }) }
         composable(Screen.Settings.route) { SettingsScreen(onBack = { navController.popBackStack() }) }
         composable(Screen.EnvironmentalDashboard.route) { EnvironmentalDashboardScreen(navController) }

@@ -6,5 +6,6 @@ data class Indicator(
     val descripcion: String = "",
     val categoria: String = "",
     val valorMaximo: Int = 5,
-    val activo: Boolean = true
+    val activo: Boolean = true,
+    val esContador: Boolean = false
 )

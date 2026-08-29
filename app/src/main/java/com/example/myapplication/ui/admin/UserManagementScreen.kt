@@ -122,7 +122,7 @@ fun UserItem(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Seleccionar Rol:", style = MaterialTheme.typography.titleSmall)
-                    UserRole.values().forEach { role ->
+                    UserRole.values().filter { it != UserRole.DOCENTE }.forEach { role ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier

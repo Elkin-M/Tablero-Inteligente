@@ -31,6 +31,15 @@ class AuthViewModel @Inject constructor(
 
     init {
         loadCourses()
+        observeUser()
+    }
+
+    private fun observeUser() {
+        viewModelScope.launch {
+            repository.getCurrentUser().collect {
+                _user.value = it
+            }
+        }
     }
 
     private fun loadCourses() {

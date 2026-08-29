@@ -27,6 +27,12 @@ class ReportsViewModel @Inject constructor(
     val rooms: StateFlow<List<com.example.myapplication.domain.model.Room>> = repository.getRoomsFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val indicators: StateFlow<List<com.example.myapplication.domain.model.Indicator>> = repository.getIndicatorsFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val diagnostics: StateFlow<List<com.example.myapplication.domain.model.BaselineDiagnostic>> = repository.getBaselinesFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     val averageScoreByCourse: StateFlow<Map<String, Double>> = combine(courses, evaluations) { courses, evaluations ->
         evaluations.filter { it.puntajeObtenido > 0 }
             .groupBy { it.courseId.ifEmpty { it.roomId } }
@@ -38,6 +44,18 @@ class ReportsViewModel @Inject constructor(
     fun rateEvaluation(evaluationId: String, score: Int) {
         viewModelScope.launch {
             repository.updateEvaluationScore(evaluationId, score)
+        }
+    }
+
+    fun toggleIndicator(indicator: com.example.myapplication.domain.model.Indicator) {
+        viewModelScope.launch {
+            repository.updateIndicator(indicator.copy(activo = !indicator.activo))
+        }
+    }
+
+    fun deleteIndicator(indicatorId: String) {
+        viewModelScope.launch {
+            repository.deleteIndicator(indicatorId)
         }
     }
 }

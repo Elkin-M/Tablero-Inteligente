@@ -82,8 +82,8 @@ class AuthRepositoryImpl @Inject constructor(
     private fun mapSnapshotToUser(uid: String, data: Map<String, Any>?): User {
         val roleStr = (data?.get("rol") ?: data?.get("role"))?.toString() ?: ""
         val rol = when (roleStr.uppercase().trim()) {
-            "ADMIN", "ADMINISTRADOR", "DIRECTIVO", "COMITE_AMBIENTAL", "COMITE AMBIENTAL", "COMITÉ AMBIENTAL" -> UserRole.ADMIN
-            "DOCENTE", "PROFESOR" -> UserRole.DOCENTE
+            "ADMIN", "ADMINISTRADOR", "DIRECTIVO" -> UserRole.ADMIN
+            "COMITE_AMBIENTAL", "COMITE AMBIENTAL", "COMITÉ AMBIENTAL", "DOCENTE", "PROFESOR" -> UserRole.COMITE_AMBIENTAL
             "ESTUDIANTE", "ALUMNO" -> UserRole.ESTUDIANTE
             "INVITADO" -> UserRole.INVITADO
             else -> UserRole.ESTUDIANTE

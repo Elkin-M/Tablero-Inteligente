@@ -29,17 +29,17 @@ object EcoColors {
     val DocentePrimary = Color(0xFF388E3C)
     val DocenteSecondary = Color(0xFF2E7D32)
 
-    val EstudiantePrimary = Color(0xFF00897B)
-    val EstudianteSecondary = Color(0xFF00695C)
+    val EstudiantePrimary = Color(0xFF0288D1) // Azulito
+    val EstudianteSecondary = Color(0xFF01579B)
 
-    val ComitePrimary = Color(0xFFE65100)
-    val ComiteSecondary = Color(0xFFBF360C)
+    val ComitePrimary = Color(0xFF4CAF50) // Verdecito
+    val ComiteSecondary = Color(0xFF2E7D32)
 
     val DirectivoPrimary = Color(0xFF1565C0)
     val DirectivoSecondary = Color(0xFF0D47A1)
 
-    val AdminPrimary = Color(0xFF5E35B1) // Ajustado de morado vibrante a uno más elegante
-    val AdminSecondary = Color(0xFF4527A0)
+    val AdminPrimary = Color(0xFF7E57C2) // Moradito
+    val AdminSecondary = Color(0xFF512DA8)
 
     /**
      * Retorna el color principal según el rol.
@@ -48,6 +48,7 @@ object EcoColors {
         UserRole.ADMIN -> AdminPrimary
         UserRole.DOCENTE -> DocentePrimary
         UserRole.ESTUDIANTE -> EstudiantePrimary
+        UserRole.COMITE_AMBIENTAL -> ComitePrimary
         else -> PrimaryGreen
     }
 
@@ -58,6 +59,7 @@ object EcoColors {
         UserRole.ADMIN -> AdminSecondary
         UserRole.DOCENTE -> DocenteSecondary
         UserRole.ESTUDIANTE -> EstudianteSecondary
+        UserRole.COMITE_AMBIENTAL -> ComiteSecondary
         else -> SecondaryGreen
     }
 }
