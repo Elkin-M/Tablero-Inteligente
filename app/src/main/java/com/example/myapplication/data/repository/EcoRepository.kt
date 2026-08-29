@@ -248,7 +248,7 @@ class EcoRepository @Inject constructor(
                             puntajeObtenido = (doc.getLong("puntajeObtenido") ?: 0L).toInt(),
                             evidenciasUrls = (doc.get("evidenciasUrls") as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
                             indicadores = (doc.get("indicadores") as? Map<*, *>)?.entries?.associate {
-                                it.key.toString() to ((it.value as? Long)?.toInt() ?: 0)
+                                it.key.toString() to ((it.value as? Number)?.toInt() ?: 0)
                             } ?: emptyMap(),
                             observaciones = doc.getString("observaciones") ?: ""
                         )

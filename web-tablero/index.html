@@ -464,7 +464,9 @@
 
   let rawRooms = [], rawEvs = [], rawIndicators = [], rawEvents = [], rawTips = [];
   let combinedData = [], currentIndex = 0, elapsed = 0;
+  let currentTipIndex = 0, tipElapsed = 0;
   const DURATION = 8000;
+  const TIP_DURATION = 5000;
 
   function formatDriveUrl(url) {
     if (!url) return url;
@@ -517,11 +519,20 @@
   function renderCounters(counters) {
     const grid = document.getElementById('gCountersGrid');
     const indicatorNames = rawIndicators.filter(i => i.esContador).map(i => i.nombre);
-    const items = Object.entries(counters).filter(([n]) => indicatorNames.includes(n));
 
-    grid.innerHTML = items.length ? items.map(([n, v]) => `
-      <div class="stat-mini"><span>${v.toLocaleString()}</span><b>${n}</b></div>
-    `).join('') : '<p>Esperando datos...</p>';
+    // Incluir indicadores marcados como contadores O que contengan "Botella"/"Tapa"
+    const items = Object.entries(counters).filter(([n]) => {
+      const nameLower = n.toLowerCase();
+      return indicatorNames.includes(n) || nameLower.includes('botella') || nameLower.includes('tapa');
+    });
+
+    grid.innerHTML = items.length ? items.map(([n, v]) => {
+      const isRecycling = n.toLowerCase().includes('botella') || n.toLowerCase().includes('tapa');
+      const unit = isRecycling ? ' Kg' : '';
+      return `
+        <div class="stat-mini"><span>${v.toLocaleString()}${unit}</span><b>${n}</b></div>
+      `;
+    }).join('') : '<p>Esperando datos...</p>';
   }
 
   function renderEvents() {
@@ -537,7 +548,7 @@
   function updateCarousel() {
     if (!combinedData.length) return;
     const cur = combinedData[currentIndex % combinedData.length];
-    document.getElementById('roomName').textContent = cur.nombre;
+    document.getElementById('roomName').textContent = `Evidencias de Salón: ${cur.nombre}`;
     document.getElementById('rPts').textContent = cur.pts;
     document.getElementById('rEvs').textContent = cur.count;
     document.getElementById('rDate').textContent = cur.lastDate;
@@ -546,10 +557,14 @@
     img.src = cur.photos.length ? formatDriveUrl(cur.photos[Math.floor(Math.random() * cur.photos.length)])
                                : "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800";
 
-    if (rawTips.length) {
-      document.getElementById('tipText').textContent = rawTips[Math.floor(Math.random() * rawTips.length)].mensaje;
-    }
     renderRanking();
+  }
+
+  function updateTip() {
+    if (!rawTips.length) return;
+    const tip = rawTips[currentTipIndex % rawTips.length];
+    document.getElementById('tipText').textContent = tip.contenido || tip.mensaje || "¡Pequeñas acciones logran grandes cambios!";
+    currentTipIndex++;
   }
 
   onAuthStateChanged(auth, user => {
@@ -561,7 +576,10 @@
       onSnapshot(collection(db, 'indicators'), s => { rawIndicators = s.docs.map(d => d.data()); processData(); });
       onSnapshot(collection(db, 'evaluations'), s => { rawEvs = s.docs.map(d => d.data()); processData(); });
       onSnapshot(collection(db, 'events'), s => { rawEvents = s.docs.map(d => d.data()).filter(e => e.activa !== false).sort((a,b)=>a.fecha-b.fecha); renderEvents(); });
-      onSnapshot(collection(db, 'tips'), s => { rawTips = s.docs.map(d => d.data()).filter(t => t.activa !== false); });
+      onSnapshot(collection(db, 'tips'), s => {
+        rawTips = s.docs.map(d => d.data()).filter(t => t.activa !== false);
+        if (rawTips.length && tipElapsed === 0) updateTip();
+      });
     }
   });
 
@@ -572,6 +590,14 @@
       elapsed += 200;
       document.getElementById('timerFill').style.width = (elapsed / DURATION) * 100 + '%';
       if (elapsed >= DURATION) { elapsed = 0; currentIndex++; updateCarousel(); }
+    }
+
+    if (rawTips.length) {
+      tipElapsed += 200;
+      if (tipElapsed >= TIP_DURATION) {
+        tipElapsed = 0;
+        updateTip();
+      }
     }
   }, 200);
 

@@ -14,6 +14,8 @@ import javax.inject.Inject
 data class EnvironmentalImpact(
     val totalPoints: Int = 0,
     val totalEvaluations: Int = 0,
+    val totalBottles: Int = 0,
+    val totalTapas: Int = 0,
     val recentEvidences: List<String> = emptyList(),
     val pointsByCategory: Map<String, Int> = emptyMap()
 )
@@ -28,17 +30,23 @@ class EnvironmentalDashboardViewModel @Inject constructor(
             val totalPoints = evaluations.sumOf { it.puntajeObtenido }
             val evidences = evaluations.flatMap { it.evidenciasUrls }.take(10)
             
-            // Agrupar puntos por categoría de indicadores
+            var bottles = 0
+            var tapas = 0
             val categories = mutableMapOf<String, Int>()
+            
             evaluations.forEach { eval ->
                 eval.indicadores.forEach { (key, value) ->
                     categories[key] = categories.getOrDefault(key, 0) + value
+                    if (key.contains("Botella", ignoreCase = true)) bottles += value
+                    if (key.contains("Tapa", ignoreCase = true)) tapas += value
                 }
             }
 
             EnvironmentalImpact(
                 totalPoints = totalPoints,
                 totalEvaluations = evaluations.size,
+                totalBottles = bottles,
+                totalTapas = tapas,
                 recentEvidences = evidences,
                 pointsByCategory = categories
             )

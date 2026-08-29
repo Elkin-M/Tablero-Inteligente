@@ -112,24 +112,45 @@ fun EnvironmentalDashboardScreen(
 
 @Composable
 fun ImpactSummarySection(data: EnvironmentalImpact) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        ImpactCard(
-            modifier = Modifier.weight(1f),
-            title = "Puntos Totales",
-            value = data.totalPoints.toString(),
-            icon = Icons.Default.Eco,
-            color = EcoColors.PrimaryGreen
-        )
-        ImpactCard(
-            modifier = Modifier.weight(1f),
-            title = "Evaluaciones",
-            value = data.totalEvaluations.toString(),
-            icon = Icons.Default.Assessment,
-            color = Color(0xFF42A5F5)
-        )
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            ImpactCard(
+                modifier = Modifier.weight(1f),
+                title = "Puntos Totales",
+                value = data.totalPoints.toString(),
+                icon = Icons.Default.Eco,
+                color = EcoColors.PrimaryGreen
+            )
+            ImpactCard(
+                modifier = Modifier.weight(1f),
+                title = "Evaluaciones",
+                value = data.totalEvaluations.toString(),
+                icon = Icons.Default.Assessment,
+                color = Color(0xFF42A5F5)
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            ImpactCard(
+                modifier = Modifier.weight(1f),
+                title = "Botellas Recolectadas",
+                value = "${data.totalBottles} Kg",
+                icon = Icons.Default.Eco, // O cambiar por uno más específico si existe
+                color = Color(0xFF66BB6A)
+            )
+            ImpactCard(
+                modifier = Modifier.weight(1f),
+                title = "Tapas Recolectadas",
+                value = "${data.totalTapas} Kg",
+                icon = Icons.Default.Eco,
+                color = Color(0xFFFFA726)
+            )
+        }
     }
 }
 
@@ -171,7 +192,8 @@ fun CategoryBreakdown(categories: Map<String, Int>) {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(category, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
-                        Text("$points pts", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                        val unit = if (category.contains("Botella", ignoreCase = true) || category.contains("Tapa", ignoreCase = true)) " Kg" else " pts"
+                        Text("$points$unit", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     LinearProgressIndicator(

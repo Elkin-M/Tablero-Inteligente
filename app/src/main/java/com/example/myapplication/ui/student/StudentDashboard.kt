@@ -446,7 +446,7 @@ fun EvaluationItem(evaluation: Evaluation) {
                                 style = MaterialTheme.typography.labelSmall,
                                 color = EcoColors.TextMuted
                             )
-                            val unit = if (key.equals("Botellas", ignoreCase = true) || key.equals("Tapas", ignoreCase = true)) " Kg" else "/5"
+                            val unit = if (key.contains("Botella", ignoreCase = true) || key.contains("Tapa", ignoreCase = true)) " Kg" else "/5"
                             Text(
                                 text = "$value$unit",
                                 style = MaterialTheme.typography.bodySmall,

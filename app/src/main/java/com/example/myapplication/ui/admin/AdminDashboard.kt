@@ -31,18 +31,24 @@ import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.asImageBitmap
 import com.example.myapplication.ui.common.ProfileScreen
 
+import com.example.myapplication.ui.viewmodel.EnvironmentalDashboardViewModel
+import com.example.myapplication.ui.viewmodel.EnvironmentalImpact
+
 @Composable
 fun AdminDashboard(
     navController: NavController,
     rankingViewModel: RankingViewModel = hiltViewModel(),
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    environmentalViewModel: EnvironmentalDashboardViewModel = hiltViewModel()
 ) {
     val ranking by rankingViewModel.ranking.collectAsState()
     val rooms by rankingViewModel.rooms.collectAsState()
+    val impactData by environmentalViewModel.impactData.collectAsState()
 
     AdminDashboardContent(
         ranking = ranking,
         rooms = rooms,
+        impactData = impactData,
         navController = navController,
         authViewModel = authViewModel,
         onLogout = {
@@ -60,6 +66,7 @@ fun AdminDashboard(
 fun AdminDashboardContent(
     ranking: List<Course>,
     rooms: List<Room>,
+    impactData: EnvironmentalImpact,
     navController: NavController,
     authViewModel: AuthViewModel,
     onLogout: () -> Unit
@@ -164,7 +171,7 @@ fun AdminDashboardContent(
                 .padding(padding)
         ) {
             when (selectedTab) {
-                0 -> TabInicio(ranking = ranking, totalSalones = rooms.size, navController = navController)
+                0 -> TabInicio(ranking = ranking, totalSalones = rooms.size, impactData = impactData, navController = navController)
                 1 -> TabRankingCompleto(ranking = ranking)
                 2 -> ProfileScreen(authViewModel = authViewModel, onLogout = onLogout)
             }
@@ -173,7 +180,7 @@ fun AdminDashboardContent(
 }
 
 @Composable
-fun TabInicio(ranking: List<Course>, totalSalones: Int, navController: NavController) {
+fun TabInicio(ranking: List<Course>, totalSalones: Int, impactData: EnvironmentalImpact, navController: NavController) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -198,9 +205,15 @@ fun TabInicio(ranking: List<Course>, totalSalones: Int, navController: NavContro
                 color = EcoColors.TextDark
             )
             val totalPuntos = remember(ranking) { ranking.sumOf { it.puntosTotales } }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                AdminSummaryCard(modifier = Modifier.weight(1f), title = "Salones", value = "$totalSalones", icon = Icons.Default.MeetingRoom)
-                AdminSummaryCard(modifier = Modifier.weight(1f), title = "Puntos Total", value = String.format("%,d", totalPuntos), icon = Icons.Default.Bolt)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    AdminSummaryCard(modifier = Modifier.weight(1f), title = "Salones", value = "$totalSalones", icon = Icons.Default.MeetingRoom)
+                    AdminSummaryCard(modifier = Modifier.weight(1f), title = "Puntos Total", value = String.format("%,d", totalPuntos), icon = Icons.Default.Bolt)
+                }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    AdminSummaryCard(modifier = Modifier.weight(1f), title = "Botellas (Kg)", value = "${impactData.totalBottles}", icon = Icons.Default.Eco)
+                    AdminSummaryCard(modifier = Modifier.weight(1f), title = "Tapas (Kg)", value = "${impactData.totalTapas}", icon = Icons.Default.Eco)
+                }
             }
         }
 
